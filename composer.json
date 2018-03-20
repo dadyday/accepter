@@ -1,0 +1,21 @@
+{
+    "name": "dadyday/accepter",
+    "type": "library",
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "scripts": {
+        "test": "\"./vendor/bin/tester\" -C tests"
+    },
+    "autoload": {
+        "psr-4": {
+            "Accepter\\": "src/"
+        }
+    },
+    "require": {
+        "facebook/webdriver": "^1.5",
+        "tracy/tracy": "^2.4"
+    },
+    "require-dev": {
+        "Nette/Tester": "^2.0"
+    }
+}
