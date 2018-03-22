@@ -16,6 +16,8 @@
     };
 
     Recorder.start = function() {
+        document.getElementById("recordData").style.visibility = 'hidden';
+        document.getElementById("recordData").innerText = '';
         document.getElementById("recordState").innerText = 'record';
     };
 

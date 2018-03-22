@@ -9,10 +9,6 @@ class Fail extends \Exception {
     function __construct($message, $should, $have) {
         $this->should = $should;
         $this->have = $have;
-        parent::__construct($message);
-    }
-
-    function getMessage() {
-        return parent::getMessage() . $this->have . ' instead of ' . $this->should;
+        parent::__construct($message . $this->have . ' instead of ' . $this->should);
     }
 }

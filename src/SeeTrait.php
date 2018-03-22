@@ -9,7 +9,7 @@ use Facebook\WebDriver\ {
 
 trait SeeTrait {
 
-    function findElement($element) {
+    protected function findElement($element) {
         if ($element instanceof IWebElement) return $element;
 
         $aAccess = [];
@@ -18,6 +18,9 @@ trait SeeTrait {
         }
         if (preg_match('~[#\.]\w+~', $element, $aMatch)) {
             $aAccess[] = WebDriverBy::cssSelector($aMatch[0]);
+        }
+        if (preg_match('~^<([\w-]+)>$~', $element, $aMatch)) {
+            $aAccess[] = WebDriverBy::tagName($aMatch[1]);
         }
         $aAccess[] = WebDriverBy::id($element);
         $aAccess[] = WebDriverBy::className($element);
@@ -43,9 +46,15 @@ trait SeeTrait {
         return null;
     }
 
-    function see($what) {
+    function _find($what) {
         $el = $this->findElement($what);
         if (!$el) $this->fail("element $what not found");
         return new Element($this, $el);
+    }
+
+    function _see($what) {
+        $el = $this->_find($what);
+        $el->isVisible();
+        return $el;
     }
 }

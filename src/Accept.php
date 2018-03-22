@@ -12,6 +12,8 @@ use Facebook\WebDriver\ {
     WebDriverBy,
     WebDriverWait
 };
+use Exception;
+use Tester\Assert;
 
 class Accept {
     static $defaultHost = 'http://localhost:4444/wd/hub';
@@ -24,12 +26,26 @@ class Accept {
         $cmd = 'java -jar selenium-server-standalone.jar';
     }
 
+    protected static $oInst;
+
+    static function getInstance() {
+        if (!static::$oInst) static::$oInst = new static();
+        return static::$oInst;
+    }
+
+    static function __callStatic($name, $args) {
+        return call_user_func_array([static::getInstance(), $name], $args);
+    }
+
     use SeeTrait;
+    use InvokeTrait;
 
     protected $oWd;
+    protected $caller;
 
 
     function __construct(IWebDriver $oDriver = null) {
+        static::$oInst = $this;
         $oDriver = $oDriver ?: RemoteWebDriver::create(static::$defaultHost, static::$defaultCaps);
         $this->oWd = $oDriver;
     }
@@ -40,35 +56,44 @@ class Accept {
         }
     }
 
-    function fail($message) {
-        $target = $this->getCallingLine();
-        $this->runScript("alert('{$target['file']}:{$target['line']} ({$target['code']})');");
-        static::$keepBrowser = true;
-        throw new \Exception($message);
+    function __call($name, $args) {
+        $this->caller = $this->getCallingLine();
+
+        if (!$this->_invoke("_$name", $args, $result)) throw new Exception("method $name not found");
+        return $result ?: $this;
     }
 
-    function open($url) {
+    function fail($message, $actual, $expected) {
+        #$target = $this->caller;
+        #$this->_runScript("alert('{$target['file']}:{$target['line']} ({$target['code']})');");
+        #static::$keepBrowser = true
+        #$message = sprintf("%s, %s instead of %s", $message, $actual, $expected);
+        #throw new Exception($message);
+        Assert::fail($message, $actual, $expected);
+    }
+
+    function _open($url) {
         $this->oWd->get($url);
         $js = file_get_contents(__DIR__.'/Assets/record.js');
-        $this->runScript($js);
+        $this->_runScript($js);
     }
 
-    function moveTo($element) {
+    function _moveTo($element) {
         $el = $this->findElement($element);
         $this->oWd->getWebDriver()->getMouse()->mouseMove($el->getCoordinates());
     }
 
-    function click($element) {
+    function _click($element) {
         $el = $this->findElement($element);
         $el->click();
     }
 
-    function runScript($script) {
+    function _runScript($script) {
         $this->oWd->executeScript($script);
     }
 
-    function record() {
-        $this->runScript('window.Recorder.start();');
+    function _record() {
+        $this->_runScript('window.Recorder.start();');
         $state = WebDriverBy::id('recordState');
         $cond = WebDriverExpectedCondition::elementTextIs($state, 'stop');
         $wait = new WebDriverWait($this->oWd, 60);
@@ -76,7 +101,7 @@ class Accept {
 
         $rc = $this->findElement('recordData')->getText();
         $code = $this->generateCode($rc);
-        $trg = $this->getCallingLine();
+        $trg = $this->caller;
         $this->putLine($trg['file'], $trg['line'], $code);
     }
 
@@ -84,20 +109,28 @@ class Accept {
         $data = json_decode($json);
         bdump($data);
         if (!$data) return '// nothing recorded';
-        return join("\n", [
+        return [
             "// recorded",
             "\$I->see('{$data->target->id}')",
             "   ->click()",
             "   ->hasText('{$data->target->text}')",
             ";"
-        ]);
+        ];
     }
 
     protected function getCallingLine() {
         $aTrace = debug_backtrace();
-        bdump($aTrace);
-        $file = $aTrace[1]['file'];
-        $line = $aTrace[1]['line'];
+        #bdump($aTrace);
+        for ($n = 1; $n < count($aTrace); $n++) {
+            if (!isset($aTrace[$n]['file'])) continue;
+            if ($aTrace[$n]['file'] == __FILE__) continue;
+            #if ($aTrace[$n]['class'] == self::class) continue;
+            break;
+        };
+        if ($n >= count($aTrace)) throw new Exception('caller not found');
+        bdump($aTrace[$n]);
+        $file = $aTrace[$n]['file'];
+        $line = $aTrace[$n]['line'];
 
         $file = preg_replace('~\\\\~', '/', $file);
         $file = preg_replace('~\'~', '\\\'', $file);
@@ -110,10 +143,20 @@ class Accept {
         ];
     }
 
-    function putLine($file, $line, $code) {
+    protected $aOffset = [];
+
+    protected function putLine($file, $line, $code) {
+        if (empty($file)) throw new Exception('file empty while putting recorded lines');
         $aLine = file($file);
-        file_put_contents($file.'.bak', implode($aLine));
-        array_splice($aLine, $line-1, 0, [$code."\n", "\n"]);
+        $bak = dirname($file).'/_'.basename($file).'.bak';
+        file_put_contents($bak, implode($aLine));
+
+        $code = array_map(function($item) { return $item."\n"; }, $code);
+        if (!isset($this->aOffset[$file])) $this->aOffset[$file] = 0;
+        $line += $this->aOffset[$file];
+        $this->aOffset[$file] += count($code);
+
+        array_splice($aLine, $line-1, 0, $code);
         file_put_contents($file, implode($aLine));
     }
 
