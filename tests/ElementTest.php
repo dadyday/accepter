@@ -8,7 +8,7 @@ $html = <<<HTML
 <head>
     <style>
         h1 { font-weight: bold; }
-        h2 { font-weight: normal; opacity: 0.1; }
+        h2 { font-weight: normal; }
     </style>
 </head>
 <body>

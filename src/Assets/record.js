@@ -3,32 +3,33 @@
 
     var Recorder = window.Recorder = function() {
     };
+    Recorder.data = null;
 
     Recorder.create = function() {
-        var div = document.createElement("div");
-        div.innerHTML = "\
-            <span id=recordState onclick='Recorder.stop();'>\
-                playback\
-            </span>\
-            &lt;- click if youre ready\
-            <span id=recordData style='visibility: hidden'>-</span>";
-        document.body.appendChild(div);
+        $('#recordState').on('click', Recorder.toggle);
+    };
+
+    Recorder.isRecording = function() {
+        return $('#recordState').hasClass('record');
+    };
+
+    Recorder.toggle = function() {
+        var on = !Recorder.isRecording();
+        if (on) Recorder.start(); else Recorder.stop();
     };
 
     Recorder.start = function() {
-        document.getElementById("recordData").style.visibility = 'hidden';
-        document.getElementById("recordData").innerText = '';
-        document.getElementById("recordState").innerText = 'record';
+        $('#recordBar > #recordResult').remove();
+        $('#recordState').addClass('record');
     };
 
     Recorder.stop = function() {
-        document.getElementById("recordData").style.visibility = 'visible'; // wont be found by wd
-        document.getElementById("recordState").innerText = 'stop';
+        $('#recordState').removeClass('record');
+        $('#recordBar').append('<span id="recordResult">'+Recorder.data+'</span>');
     };
 
     Recorder.listener = function(ev) {
-        console.log(ev.target);
-        if (document.getElementById("recordState").innerText != 'record') return;
+        if (!Recorder.isRecording()) return;
         if (ev.target.id == 'recordState') return;
         var data = {
             type: ev.type,
@@ -41,11 +42,12 @@
             }
         };
         var json = JSON.stringify(data);
-        document.getElementById("recordData").innerText = json;
+        Recorder.data = json;
     };
 
-
-    Recorder.create();
-    document.body.addEventListener("click", Recorder.listener);
-
+    if (typeof($) == 'undefined') alert('jquery not loaded!');
+    else {
+        Recorder.create();
+        document.body.addEventListener("click", Recorder.listener);
+    };
 })();

@@ -14,13 +14,15 @@ use Facebook\WebDriver\ {
 };
 use Exception;
 use Tester\Assert;
+use Nette\SmartObject;
 
 class Accept {
+    #use SmartObject;
+
     static $defaultHost = 'http://localhost:4444/wd/hub';
     static $defaultCaps = [
         WebDriverCapabilityType::BROWSER_NAME => 'chrome'
     ];
-    static $keepBrowser = false;
 
     static function runDriver() {
         $cmd = 'java -jar selenium-server-standalone.jar';
@@ -40,33 +42,46 @@ class Accept {
     use SeeTrait;
     use InvokeTrait;
 
-    protected $oWd;
-    protected $caller;
+    protected
+        $oWd;
+
+    public
+        $keepBrowser = false;
 
 
     function __construct(IWebDriver $oDriver = null) {
-        static::$oInst = $this;
-        $oDriver = $oDriver ?: RemoteWebDriver::create(static::$defaultHost, static::$defaultCaps);
+        if (!$oDriver) {
+            if (static::$oInst) {
+                static::$oInst->keepBrowser = true;
+                $oDriver = static::$oInst->getDriver();
+            }
+            else {
+                $oDriver = RemoteWebDriver::create(static::$defaultHost, static::$defaultCaps);
+            }
+        }
         $this->oWd = $oDriver;
+        static::$oInst = $this;
     }
 
     function __destruct() {
-        if (!static::$keepBrowser) {
+        if (!$this->keepBrowser) {
             $this->oWd->quit();
         }
     }
 
     function __call($name, $args) {
-        $this->caller = $this->getCallingLine();
-
         if (!$this->_invoke("_$name", $args, $result)) throw new Exception("method $name not found");
         return $result ?: $this;
+    }
+
+    function getDriver() {
+        return $this->oWd;
     }
 
     function fail($message, $actual, $expected) {
         #$target = $this->caller;
         #$this->_runScript("alert('{$target['file']}:{$target['line']} ({$target['code']})');");
-        #static::$keepBrowser = true
+        #$this->keepBrowser = true
         #$message = sprintf("%s, %s instead of %s", $message, $actual, $expected);
         #throw new Exception($message);
         Assert::fail($message, $actual, $expected);
@@ -74,7 +89,7 @@ class Accept {
 
     function _open($url) {
         $this->oWd->get($url);
-        $js = file_get_contents(__DIR__.'/Assets/record.js');
+        $js = include(__DIR__.'/assets/inject.php');
         $this->_runScript($js);
     }
 
@@ -94,30 +109,38 @@ class Accept {
 
     function _record() {
         $this->_runScript('window.Recorder.start();');
-        $state = WebDriverBy::id('recordState');
-        $cond = WebDriverExpectedCondition::elementTextIs($state, 'stop');
+        $state = WebDriverBy::id('recordResult');
+        $cond = WebDriverExpectedCondition::presenceOfElementLocated($state);
         $wait = new WebDriverWait($this->oWd, 60);
         $wait->until($cond);
 
-        $rc = $this->findElement('recordData')->getText();
-        $code = $this->generateCode($rc);
-        $trg = $this->caller;
-        $this->putLine($trg['file'], $trg['line'], $code);
+        $oWriter = new CodeWriter();
+        $oWriter->findTarget(self::class);
+        $prefix = $oWriter->getCodePrefix('record(');
+
+        $rc = $this->findElement('recordResult')->getText();
+        $code = $this->generateCode($rc, $prefix);
+
+        $oWriter->addCode($code);
+        $oWriter->save();
+        dump($oWriter);
+        #$trg = $this->caller;
+        #$this->putLine($trg['file'], $trg['line'], $code);
     }
 
-    protected function generateCode($json) {
+    protected function generateCode($json, $prefix) {
         $data = json_decode($json);
         bdump($data);
         if (!$data) return '// nothing recorded';
         return [
             "// recorded",
-            "\$I->see('{$data->target->id}')",
+            "{$prefix}see('{$data->target->id}')",
             "   ->click()",
             "   ->hasText('{$data->target->text}')",
             ";"
         ];
     }
-
+/*
     protected function getCallingLine() {
         $aTrace = debug_backtrace();
         #bdump($aTrace);
@@ -143,7 +166,9 @@ class Accept {
         ];
     }
 
-    protected $aOffset = [];
+    function getOffset() {
+        return $this->aOffset;
+    }
 
     protected function putLine($file, $line, $code) {
         if (empty($file)) throw new Exception('file empty while putting recorded lines');
@@ -159,5 +184,5 @@ class Accept {
         array_splice($aLine, $line-1, 0, $code);
         file_put_contents($file, implode($aLine));
     }
-
+*/
 }

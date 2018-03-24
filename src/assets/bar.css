@@ -1,0 +1,53 @@
+
+#recordBar {
+    font: normal normal 13px/1.55 Tahoma, sans-serif;
+    color: #333;
+    border: 1px solid #c9c9c9;
+    background: #EDEAE0 url(data:image/png;base64,R0lGODlhAQAUALMAAOzq4e/t5e7s4/Dt5vDu5e3r4vDu5uvp4O/t5AAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAAAAAAALAAAAAABABQAAAQM0EgySEAYi1LA+UcEADs=) top;
+    background-size: 1em;
+    position: sticky;
+    top: 0px;
+    left: 0px;
+    width: 350px;
+    min-width: 350px;
+    z-index: 30000;
+    opacity: .9;
+    transition: opacity 0.2s;
+    will-change: opacity, right, bottom;
+    border-radius: 3px;
+    box-shadow: 1px 1px 10px rgba(0, 0, 0, .15);
+    margin: 10px;
+    padding: 2px;
+}
+
+/* https://linearicons.com/free#cheat-sheet */
+#recordBar > #recordState::before {
+    font-family: Linearicons-Free;
+    speak: none;
+    font-style: normal;
+    font-weight: 800;
+    font-variant: normal;
+    text-transform: none;
+    line-height: 1;
+    -webkit-font-smoothing: antialiased;
+    padding: 2px;
+}
+
+#recordBar > #recordState::after {
+    content: "Playing";
+}
+#recordBar > #recordState::before {
+    content: "\e85a";
+    color: green;
+}
+#recordBar #recordState.record::after {
+    content: "Recording";
+}
+#recordBar #recordState.record::before {
+    content: "\e85e";
+    color: red;
+}
+#recordBar #recordResult {
+    /*visibility: hidden;*/
+    font-size: 0.1px;
+}
