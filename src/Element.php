@@ -59,8 +59,18 @@ class Element {
         return [
             (is_numeric($weight) && $weight >= 500) ||
             ($weight == 'bold'),
-            "is *not* bold",
+            "%1 is *not* bold",
             $weight,
+        ];
+    }
+
+    protected function _hasClass($value) {
+        $class = $this->oElement->getAttribute("class");
+        return [
+            (preg_match('~\b'.preg_quote($value).'\b~', $class)),
+            "%1 has *not* class %2",
+            $class,
+            $value
         ];
     }
 
@@ -72,7 +82,7 @@ class Element {
         if (preg_match('~^([/\~#]).+(\1)[imsex]*$~', $value)) {
             return [preg_match($value, $text), "%1 matches *not* pattern %2", $text, $value];
         }
-        return [strpos($value, $text) !== false, "%1 contains *not* text %2", $text, $value];
+        return [strpos($text, $value) !== false, "%1 contains *not* text %2", $text, $value];
     }
 
 }
