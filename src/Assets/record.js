@@ -1,53 +1,67 @@
 
 (function(){
 
-    var Recorder = window.Recorder = function() {
-    };
-    Recorder.data = null;
+var Recorder = class {
 
-    Recorder.create = function() {
-        $('#recordState').on('click', Recorder.toggle);
-    };
+    constructor() {
+        this.recording = false;
+        this.mode = null;
+        this.data = [];
+        var _this = this;
+        $('#recordState').on('click', function(ev) { _this.toggle(); });
+        $('#recordFuncs button').on('click', function(ev) { _this.interaction($(ev.target)); });
+    }
 
-    Recorder.isRecording = function() {
-        return $('#recordState').hasClass('record');
-    };
+    toggle() {
+        if (!this.recording) this.start(); else this.stop();
+        console.log(this);
+    }
 
-    Recorder.toggle = function() {
-        var on = !Recorder.isRecording();
-        if (on) Recorder.start(); else Recorder.stop();
-    };
-
-    Recorder.start = function() {
-        $('#recordBar > #recordResult').remove();
+    start() {
+        $('#recordResult').remove();
         $('#recordState').addClass('record');
-    };
+        this.recording = true;
+    }
 
-    Recorder.stop = function() {
+    stop() {
+        var json = JSON.stringify(this.data);
+        $('#recordBar').append('<span id="recordResult">'+json+'</span>');
         $('#recordState').removeClass('record');
-        $('#recordBar').append('<span id="recordResult">'+Recorder.data+'</span>');
-    };
+        this.recording = false;
+    }
 
-    Recorder.listener = function(ev) {
-        if (!Recorder.isRecording()) return;
-        if (ev.target.id == 'recordState') return;
-        var data = {
-            type: ev.type,
+    interaction(el) {
+        el.toggleClass('switched');
+        this.mode = el.hasClass('switched') ? el.attr('data-mode') : null;
+    }
+
+    addEvent(ev, el) {
+        var item = {
+            mode: this.mode,
+            type: ev,
             target: {
-                tag: ev.target.tagName,
-                id: ev.target.id,
-                name: ev.target.name,
-                text: ev.target.innerText,
-                classList: ev.target.classList
+                tag: el.tagName,
+                id: el.id,
+                name: $(el).attr('name'),
+                text: el.textContent,
+                classList: $(el).attr('class')
             }
         };
-        var json = JSON.stringify(data);
-        Recorder.data = json;
-    };
+        this.data.push(item);
+    }
 
-    if (typeof($) == 'undefined') alert('jquery not loaded!');
-    else {
-        Recorder.create();
-        document.body.addEventListener("click", Recorder.listener);
-    };
+    listener(ev) {
+        if (!this.recording) return;
+        if (ev.target.id == 'recordState') return;
+        this.addEvent(ev.type, ev.target);
+    }
+};
+
+if (typeof($) == 'undefined') alert('jquery not loaded!');
+else {
+    window.Recorder = new Recorder();
+    console.log(window.Recorder);
+    document.body.addEventListener("click", window.Recorder.listener.bind(window.Recorder));
+};
+
 })();

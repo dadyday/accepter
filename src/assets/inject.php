@@ -7,7 +7,8 @@ if (!function_exists('jsFormat')) { function jsFormat($text) {
     return $text;
 }};
 
-$jquery = jsFormat(file_get_contents('https://code.jquery.com/jquery-3.3.1.slim.min.js'));
+//$jquery = jsFormat(file_get_contents('https://code.jquery.com/jquery-3.3.1.slim.min.js'));
+$jquery = jsFormat(file_get_contents($assets.'jquery.js'));
 $css = jsFormat(file_get_contents($assets.'bar.css'));
 $html = jsFormat(file_get_contents($assets.'bar.html'));
 $js = (file_get_contents($assets.'record.js'));

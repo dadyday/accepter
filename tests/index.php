@@ -5,4 +5,6 @@ Tracy\Debugger::enable();
 Tracy\Debugger::$maxDepth = 8;
 Tracy\Debugger::$maxLength = 500;
 
-include 'RecordTest.php';
+bdump(['test', 'test2'],'title');
+
+include 'app/index.php';

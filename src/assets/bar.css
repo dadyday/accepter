@@ -51,3 +51,18 @@
     /*visibility: hidden;*/
     font-size: 0.1px;
 }
+
+#recordBar #recordFuncs * {
+    font-family: Linearicons-Free;
+    speak: none;
+    font-style: normal;
+    font-weight: 800;
+    font-variant: normal;
+    text-transform: none;
+    line-height: 1;
+    -webkit-font-smoothing: antialiased;
+    padding: 2px;
+}
+#recordBar .mouse::before { content: "\e852"; }
+#recordBar .keys::before { content: "\e837"; }
+#recordBar .see::before { content: "\e81b"; }
