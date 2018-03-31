@@ -29,7 +29,7 @@ class Element {
                 throw new Exception("method $name not found");
             }
         };
-        bdump([$name, $result], 'element-result');
+        #bdump([$name, $result], 'element-result');
         $result += [1 => 'not described', 2 => null, 3 => null];
         $result[1] = preg_replace('~(\*(.*)\*)~', '$2', $result[1]);
         if (!$result[0]) $this->fail($result[1], $result[2], $result[3]);
@@ -62,6 +62,17 @@ class Element {
             ($weight == 'bold'),
             "%1 is *not* bold",
             $weight,
+        ];
+    }
+
+    protected function _hasId($value) {
+        $value = ''.$value;
+        $id = $this->oElement->getAttribute("id");
+        return [
+            ($value) ? $value === $id : empty($id),
+            "%1 has *not* id %2",
+            $id,
+            $value
         ];
     }
 

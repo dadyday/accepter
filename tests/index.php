@@ -5,5 +5,5 @@ Tracy\Debugger::enable();
 Tracy\Debugger::$maxDepth = 8;
 Tracy\Debugger::$maxLength = 500;
 
-include 'app/test.php';
-#include 'CodeGenTest.php';
+#include 'app/test.php';
+include 'FindMultiTest.php';

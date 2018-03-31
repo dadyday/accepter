@@ -40,14 +40,21 @@ trait SeeTrait {
         return $aRet;
     }
 
-    protected function findElement($element) {
-        if ($element instanceof IWebElement) return $element;
+    protected function findElement($desc) {
+        $aEl = $this->findElements($desc);
+        if (count($aEl) > 1) $this->fail("element $desc not unique enough");
+        return $aEl[0];
+    }
 
-        $aMech = $this->getFindMechanism($element);
+    protected function findElements($desc) {
+        if ($desc instanceof IWebElement) return $desc;
+
+        $aMech = $this->getFindMechanism($desc);
         foreach ($aMech as $mechanism => $search) {
             try {
                 $oMech = WebDriverBy::$mechanism($search);
-                $el = $this->oWd->findElement($oMech);
+                $el = $this->oWd->findElements($oMech);
+                #bdump($el);
                 if ($el) return $el;
             }
             catch (Exception\NoSuchElementException $e) {}
@@ -56,14 +63,15 @@ trait SeeTrait {
         return null;
     }
 
-    function _find($what) {
-        $el = $this->findElement($what);
-        if (!$el) $this->fail("element $what not found");
-        return new Element($this, $el);
+    function _find($desc) {
+        $aEl = $this->findElements($desc);
+        if (!$aEl) $this->fail("element $desc not found");
+        if (count($aEl) > 1) return new ElementList($this, $aEl);
+        return new Element($this, $aEl[0]);
     }
 
-    function _see($what) {
-        $el = $this->_find($what);
+    function _see($desc) {
+        $el = $this->_find($desc);
         $el->isVisible();
         return $el;
     }
