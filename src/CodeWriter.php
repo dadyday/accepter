@@ -18,6 +18,10 @@ class CodeWriter {
         $line,
         $aContent = null;
 
+    public
+        $tab = '    ',
+        $lf = "\n";
+
     function __construct() {
     }
 
@@ -28,36 +32,60 @@ class CodeWriter {
         $file = preg_replace('~\\\\~', '/', $file);
         $file = preg_replace('~\'~', '\\\'', $file);
 
+        $this->attachFile($file, $line);
+    }
+
+    function attachFile($file, $line = null) {
+        $content = file($file);
+        $this->attachContent($content, $file, $line);
+    }
+
+    function attachContent($content, $file = null, $line = null) {
         $this->file = $file;
         $this->line = $line;
-        $this->aContent = file($file, FILE_IGNORE_NEW_LINES);
+        $this->aContent = is_array($content) ? $content : explode("\n", $content);
+        $this->_scanCodeStyle();
     }
 
-    function getCodePrefix($marker) {
-        $pattern = '~^(.*)'.preg_quote($marker).'~';
+    protected function _scanCodeStyle() {
+        $this->tab = '    ';
+        $this->lf = "\n";
+        foreach ($this->aContent as $line) {
+            if (!preg_match('~^(\t| +|)[^\r\n]*?([\r\n]+)$~', $line, $aMatch)) continue;
+            list(, $tab, $lf) = $aMatch;
+            $this->lf = $lf;
+            if ($tab) {
+                $this->tab = $tab;
+                break;
+            }
+        }
+    }
+
+    function getPrefix($marker, &$indent) {
+        $pattern = '~^(\s*)(.*)'.preg_quote($marker).'~';
         $line = $this->aContent[$this->line + $this->offset];
+        #bdump([$pattern, $line], 'prefix');
         if (!preg_match($pattern, $line, $aMatch)) return null;
-        return $aMatch[1];
+        $indent = $aMatch[1];
+        return $aMatch[2];
     }
 
-    function addCode($code) {
+    function addCode($aCode) {
         if (empty($this->file)) throw new Exception('file empty while putting recorded lines');
 
         $line = $this->line + $this->offset;
-        $this->offset += count($code);
+        $this->offset += count($aCode);
 
-        array_splice($this->aContent, $line, 0, $code);
+        array_splice($this->aContent, $line, 0, $aCode);
     }
 
     function backup() {
         $bak = dirname($this->file).'/_'.basename($this->file).'.bak';
-        $code = $this->_attachLineFeed($this->aContent);
-        file_put_contents($bak, implode($code));
+        file_put_contents($bak, implode($this->aContent));
     }
 
     function save() {
-        $code = $this->_attachLineFeed($this->aContent);
-        file_put_contents($this->file, implode($code));
+        file_put_contents($this->file, implode($this->aContent));
     }
 
     protected function getOffset() {
@@ -66,10 +94,6 @@ class CodeWriter {
 
     protected function setOffset($value) {
         static::$aOffset[$this->file] = $value;
-    }
-
-    protected function _attachLineFeed($aCode, $nl = "\n") {
-        return array_map(function($item) use($nl) { return $item.$nl; }, $aCode);
     }
 
     protected function _getTraceEntry($entryClass) {

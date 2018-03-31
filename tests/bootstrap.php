@@ -13,3 +13,8 @@ else {
     define('TEMP', __DIR__."/_temp/$thread/");
 };
 Tester\Helpers::purge(TEMP);
+
+function ws($text) {
+    $text = strtr($text, ["\r" => '\r', "\n" => '\n', "\t" => '\t', ' ' => '_']); // "↲←↦•"
+    return $text;
+}

@@ -14,6 +14,7 @@ $html = <<<HTML
 <body>
     <h1>Title</h1>
     <h2>Subtitle</h2>
+    <div id="div">Div<b class="class">Span</b></div>
 <body>
 </html>
 HTML;
@@ -31,4 +32,10 @@ I::find('<h2>')
     ->hasText('/title/i')
     ->isVisible()
     ->isNotBold()
+;
+
+I::see('#div .class')
+    ->hasText('~^Span$~')
+    ->isVisible()
+    ->isBold()
 ;

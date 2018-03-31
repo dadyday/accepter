@@ -5,6 +5,5 @@ Tracy\Debugger::enable();
 Tracy\Debugger::$maxDepth = 8;
 Tracy\Debugger::$maxLength = 500;
 
-bdump(['test', 'test2'],'title');
-
-include 'app/index.php';
+include 'app/test.php';
+#include 'CodeGenTest.php';

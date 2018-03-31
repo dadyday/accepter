@@ -52,7 +52,8 @@ var Recorder = class {
 
     listener(ev) {
         if (!this.recording) return;
-        if (ev.target.id == 'recordState') return;
+        var bar = $(ev.target).closest('#recordBar');
+        if (bar[0]) return;
         this.addEvent(ev.type, ev.target);
     }
 };

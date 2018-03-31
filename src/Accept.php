@@ -57,6 +57,10 @@ class Accept {
         $onRecord;
 
     function __construct(IWebDriver $oDriver = null) {
+        #$capabilities  = DesiredCapabilities::chrome();
+        #$chromeOptions = (new ChromeOptions)->addArguments(['headless', 'disable-gpu']);
+        #$capabilities->setCapability(ChromeOptions::CAPABILITY, $chromeOptions);
+
         if (!$oDriver) {
             if (static::$oInst) {
                 static::$oInst->keepBrowser = true;
@@ -143,12 +147,20 @@ class Accept {
 
         $oWriter = new CodeWriter();
         $oWriter->findTarget(self::class);
-        $prefix = $oWriter->getCodePrefix('record(');
 
-        $rc = $this->findElement('recordResult')->getText();
-        $code = $this->generateCode($rc, $prefix);
+        $json = $this->findElement('recordResult')->getText();
+        $data = json_decode($json);
 
-        $oWriter->addCode($code);
+        #$code = $this->generateCode($rc, $prefix);
+        $oGen = new CodeGenerator([
+            'tab' => $oWriter->tab,
+            'lf' => $oWriter->lf,
+            'prefix' => $oWriter->getPrefix('record(', $indent),
+            'indent' => $indent,
+        ], $data[0]);
+        $aCode = $oGen->getCodeArray();
+
+        $oWriter->addCode($aCode);
         $oWriter->save();
     }
 

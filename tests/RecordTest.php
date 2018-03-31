@@ -36,6 +36,7 @@ file_put_contents(TEMP.'/record.php', $php);
 
 I::addDefaultListener('record', function($I) {
     $I->waitUntil(function($I) { $I->see('#recordState')->hasClass('record'); });
+    $I->click('#recordBar .mouse');
     $I->click('#binda');
     $I->click('#recordState');
     $I->waitUntil(function($I) { $I->see('#recordState')->hasNotClass('record'); });

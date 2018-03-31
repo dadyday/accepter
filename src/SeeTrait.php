@@ -14,10 +14,10 @@ trait SeeTrait {
 
         $aAccess = [];
         if (preg_match('~[/@]\w+~', $element, $aMatch)) {
-            $aAccess[] = WebDriverBy::xpath($aMatch[0]);
+            $aAccess[] = WebDriverBy::xpath($element);
         }
-        if (preg_match('~[#\.]\w+~', $element, $aMatch)) {
-            $aAccess[] = WebDriverBy::cssSelector($aMatch[0]);
+        if (preg_match('~[#\.][\w-]+~', $element, $aMatch)) {
+            $aAccess[] = WebDriverBy::cssSelector($element);
         }
         if (preg_match('~^<([\w-]+)>$~', $element, $aMatch)) {
             $aAccess[] = WebDriverBy::tagName($aMatch[1]);
