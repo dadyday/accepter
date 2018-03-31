@@ -25,6 +25,7 @@ class ElementList {
                 $oElement->__call($name, $args);
             }
             catch (Exception $e) {
+                // TODO: make this inst reusable for ElementWait class
                 unset($this->aElement[$i]);
                 if (!$this->aElement) throw $e;
             }

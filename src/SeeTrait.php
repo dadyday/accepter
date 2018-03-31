@@ -75,4 +75,11 @@ trait SeeTrait {
         $el->isVisible();
         return $el;
     }
+
+    function _wait($desc, $timeout = 10) {
+        // TODO: put elemnent find into timer proc
+        $aEl = $this->findElements($desc);
+        return new ElementWait($this, $aEl, $timeout);
+    }
+
 }
