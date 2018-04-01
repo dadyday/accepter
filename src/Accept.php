@@ -157,24 +157,12 @@ class Accept {
             'lf' => $oWriter->lf,
             'prefix' => $oWriter->getPrefix('record(', $indent),
             'indent' => $indent,
-        ], $data[0]);
+        ]);
+        $oGen->run($data[0]);
         $aCode = $oGen->getCodeArray();
 
         $oWriter->addCode($aCode);
         $oWriter->save();
-    }
-
-    protected function generateCode($json, $prefix) {
-        $data = json_decode($json);
-        bdump($data);
-        if (!$data) return '// nothing recorded';
-        return [
-            "// recorded",
-            "{$prefix}see('{$data->target->id}')",
-            "   ->click()",
-            "   ->hasText('{$data->target->text}')",
-            ";"
-        ];
     }
 
 }

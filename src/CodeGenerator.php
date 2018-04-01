@@ -11,11 +11,10 @@ class CodeGenerator {
 
     protected
         $oCfg = null,
-        $mode,
-        $type,
-        $target;
+        $aCode = [],
+        $lastSelector;
 
-    function __construct($cfg, $data) {
+    function __construct($cfg) {
         $this->oCfg = DataObject::from($cfg + [
             'prefix' => '\Accepter\Accept::',
             'indent' => 0,
@@ -25,56 +24,88 @@ class CodeGenerator {
         if (is_numeric($this->oCfg->indent)) {
             $this->oCfg->indent = str_repeat($this->oCfg->tab, $this->oCfg->indent);
         }
-
-        $data = DataObject::from($data);
-        bdump($data);
-        $this->mode = $data->mode;
-        $this->type = $data->type;
-        $this->target = $data->target;
     }
 
-    function locateElement() {
-        if ($this->target->id) $selector = '#'.$this->target->id;
-        else if ($this->target->class) $selector = '.'.$this->target->class;
-        else if ($this->target->text) $selector = $this->target->text;
-        else if ($this->target->xpath) $selector = $this->target->xpath;
+    function runAll($aData) {
+        foreach ($aData as $data) {
+            $this->run($data);
+        }
+    }
+
+    function run($data) {
+        $data = DataObject::from($data);
+        bdump($data);
+
+        $selector = $this->getSelector($data->target);
+
+        switch ($data->mode) {
+            case 'see':
+                $this->openCommand("see('$selector')", $selector);
+                $this->addInspection($data->target);
+                break;
+            case 'wait':
+                $this->openCommand("wait('$selector')", $selector);
+                $this->addInspection($data->target);
+                break;
+            case 'find':
+                $this->openCommand("find('$selector')", $selector);
+                $this->addInspection($data->target);
+                break;
+            case 'mouse':
+            case 'keys':
+                $this->openCommand("see('$selector')", $selector);
+                $this->addAction($data->type, $data->args);
+                break;
+            default:
+                throw new Exception("unknown data mode $data->mode");
+        }
+    }
+
+    function getSelector($target) {
+        if ($target->id) $selector = '#'.$target->id;
+        else if ($target->class) $selector = '.'.$target->class;
+        else if ($target->text) $selector = $target->text;
+        else if ($target->xpath) $selector = $target->xpath;
 
         return $selector;
     }
 
-    function indent($times = 0) {
-        return str_repeat($this->oCfg->tab, $this->oCfg->indent + $times);
+    function openCommand($code, $selector) {
+        if ($selector !== $this->lastSelector) {
+            $this->closeCommand();
+            $this->aCode[] = $this->oCfg->prefix.$code;
+        }
+        $this->lastSelector = $selector;
+    }
+
+    function closeCommand() {
+        if ($this->lastSelector) $this->aCode[count($this->aCode)-1] .= ';';
+        $this->lastSelector = null;
+    }
+
+    function addInspection($target) {
+        if ($target->text) {
+            $this->aCode[] = $this->oCfg->tab."->hasText('{$target->text}')";
+            $this->aCode[] = $this->oCfg->tab.($target->bold ? "->isBold()" : "->isNotBold()");
+        };
+        if ($target->class) {
+            $this->aCode[] = $this->oCfg->tab."->hasClass('{$target->class}')";
+        }
+        #$this->aCode[] = $this->indent(1)."->hasColor('{$target->color}')";
+    }
+
+    function addAction($type, $args) {
+        $this->aCode[] = $this->oCfg->tab.'->'.$type.'('.$args.')';
     }
 
     function getCodeArray() {
-        $el = $this->locateElement();
-        if (!$el) return [];
-
-        $aCode[] = "{$this->oCfg->prefix}see('$el')";
-
-        switch ($this->mode) {
-            case 'inspect':
-                if ($this->target->text) {
-                    $aCode[] = $this->oCfg->tab."->hasText('{$this->target->text}')";
-                    $aCode[] = $this->oCfg->tab.($this->target->bold ? "->isBold()" : "->isNotBold()");
-                };
-                if ($this->target->class) {
-                    $aCode[] = $this->oCfg->tab."->hasClass('{$this->target->class}')";
-                }
-                #$aCode[] = $this->indent(1)."->hasColor('{$this->target->color}')";
-                break;
-            case 'mouse':
-                $aCode[] = $this->oCfg->tab.'->'.$this->type.'()';
-                break;
-            case 'keys':
-                $aCode[] = $this->oCfg->tab.'->'.$this->type.'('.$this->args.')';
-                break;
+        $aRet = [];
+        $this->closeCommand();
+        foreach($this->aCode as $l => $line) {
+            $aRet[$l] = $this->oCfg->indent.$line.$this->oCfg->lf;
         }
-        $aCode[count($aCode)-1] .= ';';
-
-        foreach($aCode as $l => $line) $aCode[$l] = $this->oCfg->indent.$line.$this->oCfg->lf;
-        bdump($aCode);
-        return $aCode;
+        bdump($aRet);
+        return $aRet;
     }
 
     function getCode() {

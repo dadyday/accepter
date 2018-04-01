@@ -45,6 +45,7 @@ include(TEMP.'/record.php');
 
 
 $changed = file_get_contents(TEMP.'/record.php');
+dump($changed);
 Is::contains('I::see(', $changed);
 Is::contains('$I->see(', $changed);
 Is::match('~I::open.*I::see.*click.*I::record.*'.
