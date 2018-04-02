@@ -7,6 +7,7 @@ use Facebook\WebDriver\ {
     WebDriverBy,
     Exception
 };
+use Tester\Assert;
 
 trait SeeTrait {
 
@@ -65,6 +66,7 @@ trait SeeTrait {
 
     function _find($desc) {
         $aEl = $this->findElements($desc);
+        Assert::$counter++;
         if (!$aEl) $this->fail("element $desc not found");
         if (count($aEl) > 1) return new ElementList($this, $aEl);
         return new Element($this, $aEl[0]);
@@ -77,8 +79,13 @@ trait SeeTrait {
     }
 
     function _wait($desc, $timeout = 10) {
-        // TODO: put elemnent find into timer proc
-        $aEl = $this->findElements($desc);
+        $aEl = [];
+        $oWait = new Wait($this);
+        $oWait->run(function() use (&$aEl, $desc) {
+            $aEl = $this->findElements($desc);
+            if (!$aEl) $this->fail("element $desc not found");
+        }, $timeout);
+        // TODO: reuse elapsed time for further timeout
         return new ElementWait($this, $aEl, $timeout);
     }
 

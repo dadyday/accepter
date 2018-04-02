@@ -11,6 +11,7 @@ $html = <<<HTML
         function start(el) {
             setTimeout(function() { el.innerText = 'Is there!'; }, 2000);
             setTimeout(function() { el.style.fontWeight = 'normal'; }, 4000);
+            setTimeout(function() { document.body.appendChild(document.createElement('hr')); }, 2000);
         };
     </script>
 
@@ -38,3 +39,8 @@ Is::exception(function() {
         ->isNotBold()
         ->isNotVisible();
 }, Tester\AssertException::class, '~timed out .* visible~');
+
+I::open($file);
+I::click('<h1>');
+I::wait('<hr>', 5)
+    ->isVisible();

@@ -26,5 +26,5 @@ $should = <<<PHP
         ->isNotBold();
 
 PHP;
-dump([ws($should), ws($code)]);
+#dump([ws($should), ws($code)]);
 Is::same(ws($should), ws($code));

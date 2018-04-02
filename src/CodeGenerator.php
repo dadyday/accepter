@@ -33,9 +33,8 @@ class CodeGenerator {
     }
 
     function run($data) {
-        $data = DataObject::from($data);
-        bdump($data);
-
+        $data = DataObject::from($data, true);
+        
         $selector = $this->getSelector($data->target);
 
         switch ($data->mode) {

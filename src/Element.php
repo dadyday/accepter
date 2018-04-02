@@ -86,6 +86,18 @@ class Element {
         ];
     }
 
+    protected function _hasValue($value) {
+        $text = $this->oElement->getAttribute('value');
+        // TODO: get value from check, select etc too
+        if (empty($value)) {
+            return [!trim($text), "%1 has *not* empty value", $text, $value];
+        }
+        if (preg_match('~^([/\~#]).+(\1)[imsex]*$~', $value)) {
+            return [preg_match($value, $text), "value %1 matches *not* pattern %2", $text, $value];
+        }
+        return [strpos($text, $value) !== false, "value %1 contains *not* %2", $text, $value];
+    }
+
     protected function _hasText($value) {
         $text = $this->oElement->getText();
         if (empty($value)) {

@@ -14,7 +14,6 @@ var Recorder = class {
 
     toggle() {
         if (!this.recording) this.start(); else this.stop();
-        console.log(this);
     }
 
     start() {
@@ -31,11 +30,13 @@ var Recorder = class {
     }
 
     interaction(el) {
+        $('> .switched', el.parent).removeClass('switched');
         el.toggleClass('switched');
         this.mode = el.hasClass('switched') ? el.attr('data-mode') : null;
     }
 
     addEvent(ev, el) {
+        if (!this.mode) return;
         var item = {
             mode: this.mode,
             type: ev,

@@ -13,32 +13,34 @@ This looks like this: You create a new test:
 <?php
 use Accepter\Accept as I;
 
-I::open('http://localhost:8000/mysearch');
+I::open('demo/deepthought.html');
 
 I::record();
 ```
+
+See the example in the demo folder.
 
 Now if you run the accepter, it will open a browser window with a small toolbar.
 
 * TODO: screenshot here or vid
 
-You can use the toolbar to select the elements on the page and choose what you want to inspect. If you are ready, the accepter will add these actions to your script.
+You can use the toolbar to select the elements on the page and choose what you want to inspect. If you are ready, the accepter will add these actions to your script. e.g:
 
 ```php
 <?php
 use Accepter\Accept as I;
 
-I::open('http://localhost:8000/mysearch');
+I::open('demo/deepthought.html');
 
-// recorded
-I::see('#search')
-    ->hasNoValue()
-    ->enter('antwort auf die frage');
+//* recorded 2018-04-01 11:00:00
+I::see('#question')
+    ->enter('the question');
 
-I::wait('#result li')
+I::wait('#answers li', 10)
     ->isVisible()
     ->hasText('42')
     ->isBold();
+// recorded */
 
 I::record();
 ```

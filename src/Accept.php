@@ -10,11 +10,13 @@ use Facebook\WebDriver\ {
     Support\Events\EventFiringWebDriver,
     WebDriverDispatcher,
     WebDriverBy,
-    WebDriverWait
+    WebDriverWait,
+    WebDriverKeys
 };
 use Exception;
 use Tester\Assert;
 use Nette\SmartObject;
+use Nette\Utils\Json;
 
 class Accept {
     use SmartObject {
@@ -118,12 +120,25 @@ class Accept {
 
     function _moveTo($element) {
         $el = $this->findElement($element);
-        $this->oWd->getWebDriver()->getMouse()->mouseMove($el->getCoordinates());
+        $this->oWd->getMouse()->mouseMove($el->getCoordinates());
     }
 
-    function _click($element) {
-        $el = $this->findElement($element);
+    function _click($desc) {
+        $el = $this->findElement($desc);
+        if (!$el) $this->fail("element $desc not found");
         $el->click();
+    }
+
+    function _type($keys) {
+        $this->oWd->getKeyboard()->sendKeys($keys);
+    }
+
+    function _hit($key) {
+        $key = strtoupper($key);
+        $oRefl = new \ReflectionClass(WebDriverKeys::class);
+        $aConst = $oRefl->getConstants();
+        if (!isset($aConst[$key])) throw new Exception("unknown key $key hitted");
+        $this->oWd->getKeyboard()->sendKeys($aConst[$key]);
     }
 
     function _waitUntil($callable, $timeout = 10) {
@@ -149,7 +164,7 @@ class Accept {
         $oWriter->findTarget(self::class);
 
         $json = $this->findElement('recordResult')->getText();
-        $data = json_decode($json);
+        $data = Json::decode($json, Json::FORCE_ARRAY);
 
         #$code = $this->generateCode($rc, $prefix);
         $oGen = new CodeGenerator([
@@ -158,7 +173,7 @@ class Accept {
             'prefix' => $oWriter->getPrefix('record(', $indent),
             'indent' => $indent,
         ]);
-        $oGen->run($data[0]);
+        $oGen->runAll($data);
         $aCode = $oGen->getCodeArray();
 
         $oWriter->addCode($aCode);

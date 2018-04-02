@@ -4,7 +4,9 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "scripts": {
-        "test": "\"./vendor/bin/tester\" -C -j 4 --setup tests/setup.php "
+        "demo": "\"./vendor/bin/tester\" -C demo",
+        "test": "\"./vendor/bin/tester\" -C -j 4 --stop-on-fail --setup tests/setup.php ",
+        "cover": "\"./vendor/bin/tester\" -C -j 4 --stop-on-fail --setup tests/setup.php --coverage tests/_coverage.html --coverage-src src tests"
     },
     "autoload": {
         "psr-4": {

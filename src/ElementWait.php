@@ -11,7 +11,7 @@ class ElementWait {
         $timeout,
         $interval;
 
-    function __construct(Accept $oAccept, array $aEl, $timeout, $interval = 500) {
+    function __construct(Accept $oAccept, array $aEl, $timeout = 5, $interval = 500) {
         $this->oAccept = $oAccept;
         $this->oElements = new ElementList($oAccept, $aEl);
         $this->timeout = microtime(true) + $timeout;
