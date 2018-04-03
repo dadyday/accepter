@@ -1,10 +1,8 @@
 <?php
 namespace Accepter;
 
-use Facebook\WebDriver\ {
-    WebDriver as IWebDriver,
-    WebDriverElement as IWebElement
-};
+use Facebook\WebDriver\WebDriver as IWebDriver;
+use Facebook\WebDriver\WebDriverElement as IWebElement;
 use Exception;
 
 class ElementList {

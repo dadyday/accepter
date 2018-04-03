@@ -1,18 +1,17 @@
 <?php
 namespace Accepter;
 
-use Facebook\WebDriver\ {
-    WebDriver as IWebDriver,
-    WebDriverElement as IWebElement,
-    WebDriverExpectedCondition,
-    Remote\RemoteWebDriver,
-    Remote\WebDriverCapabilityType,
-    Support\Events\EventFiringWebDriver,
-    WebDriverDispatcher,
-    WebDriverBy,
-    WebDriverWait,
-    WebDriverKeys
-};
+use Facebook\WebDriver\WebDriver as IWebDriver;
+use Facebook\WebDriver\WebDriverElement as IWebElement;
+use Facebook\WebDriver\WebDriverExpectedCondition;
+use Facebook\WebDriver\Remote\RemoteWebDriver;
+use Facebook\WebDriver\Remote\WebDriverCapabilityType;
+use Facebook\WebDriver\Support\Events\EventFiringWebDriver;
+use Facebook\WebDriver\WebDriverDispatcher;
+use Facebook\WebDriver\WebDriverBy;
+use Facebook\WebDriver\WebDriverWait;
+use Facebook\WebDriver\WebDriverKeys;
+
 use Exception;
 use Tester\Assert;
 use Nette\SmartObject;
@@ -76,7 +75,7 @@ class Accept {
         foreach(static::$defaultListener as $event => $aListener) {
             $event = 'on'.ucfirst($event);
             foreach ($aListener as $listener) {
-                $this->$event[] = $listener;
+                array_push($this->$event, $listener);
             };
         }
 

@@ -1,12 +1,10 @@
 <?php
 namespace Accepter;
 
-use Facebook\WebDriver\ {
-    WebDriver as IWebDriver,
-    WebDriverElement as IWebElement,
-    WebDriverBy,
-    Exception
-};
+use Facebook\WebDriver\WebDriver as IWebDriver;
+use Facebook\WebDriver\WebDriverElement as IWebElement;
+use Facebook\WebDriver\WebDriverBy;
+use Facebook\WebDriver\Exception;
 use Tester\Assert;
 
 trait SeeTrait {

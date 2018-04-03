@@ -1,12 +1,11 @@
 <?php
 namespace Accepter;
 
-use Facebook\WebDriver\ {
-    WebDriver as IWebDriver,
-    WebDriverElement as IWebElement,
-    WebDriverWait,
-    Exception\TimeOutException
-};
+
+use Facebook\WebDriver\WebDriver as IWebDriver;
+use Facebook\WebDriver\WebDriverElement as IWebElement;
+use Facebook\WebDriver\WebDriverWait;
+use Facebook\WebDriver\Exception\TimeOutException;
 use Exception;
 use Tester\AssertException;
 
