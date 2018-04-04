@@ -11,6 +11,8 @@ use Facebook\WebDriver\WebDriverDispatcher;
 use Facebook\WebDriver\WebDriverBy;
 use Facebook\WebDriver\WebDriverWait;
 use Facebook\WebDriver\WebDriverKeys;
+use Facebook\WebDriver\WebDriverEventListener;
+
 
 use Exception;
 use Tester\Assert;
@@ -22,10 +24,6 @@ class Accept {
         SmartObject::__call as __smartCall;
     }
 
-    static $defaultHost = 'http://localhost:4444/wd/hub';
-    static $defaultCaps = [
-        WebDriverCapabilityType::BROWSER_NAME => 'chrome'
-    ];
     static $defaultListener = [];
 
     static function addDefaultListener($event, $callable) {
@@ -55,31 +53,35 @@ class Accept {
 
     public
         $keepBrowser = false,
-        $onRecord;
+        $onEventDefault = [],
+        $onRecord = [],
+        $onAfterNavigateTo = [];
 
-    function __construct(IWebDriver $oDriver = null) {
+    function __construct() {
         #$capabilities  = DesiredCapabilities::chrome();
         #$chromeOptions = (new ChromeOptions)->addArguments(['headless', 'disable-gpu']);
         #$capabilities->setCapability(ChromeOptions::CAPABILITY, $chromeOptions);
 
-        if (!$oDriver) {
-            if (static::$oInst) {
-                static::$oInst->keepBrowser = true;
-                $oDriver = static::$oInst->getDriver();
-            }
-            else {
-                $oDriver = RemoteWebDriver::create(static::$defaultHost, static::$defaultCaps);
-            }
-        }
+        $this->onAfterNavigateTo[] = function($url) {
+            $js = include(__DIR__.'/assets/inject.php');
+            $this->_runScript($js);
+        };
 
         foreach(static::$defaultListener as $event => $aListener) {
             $event = 'on'.ucfirst($event);
+            if (!isset($this->$event)) throw new Exception("event $event not defined");
             foreach ($aListener as $listener) {
-                array_push($this->$event, $listener);
+                $this->$event[] = $listener;
             };
         }
 
-        $this->oWd = $oDriver;
+        if (static::$oInst) {
+            static::$oInst->keepBrowser = true;
+            $this->oWd = static::$oInst->getDriver();
+        }
+        else {
+            $this->oWd = new Driver($this);
+        }
         static::$oInst = $this;
     }
 
@@ -113,8 +115,8 @@ class Accept {
 
     function _open($url) {
         $this->oWd->get($url);
-        $js = include(__DIR__.'/assets/inject.php');
-        $this->_runScript($js);
+        #$js = include(__DIR__.'/assets/inject.php');
+        #$this->_runScript($js);
     }
 
     function _moveTo($element) {
