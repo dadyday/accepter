@@ -28,6 +28,7 @@ class Accept {
 
     static function addDefaultListener($event, $callable) {
         static::$defaultListener[$event][] = $callable;
+        if (static::$oInst) static::$oInst->addListener($event, $callable);
     }
 
     static function runDriver() {
@@ -54,7 +55,7 @@ class Accept {
     public
         $keepBrowser = false,
         $onEventDefault = [],
-        $onRecord = [],
+        $onSimulate = [],
         $onAfterNavigateTo = [];
 
     function __construct() {
@@ -63,17 +64,11 @@ class Accept {
         #$capabilities->setCapability(ChromeOptions::CAPABILITY, $chromeOptions);
 
         $this->onAfterNavigateTo[] = function($url) {
-            $js = include(__DIR__.'/assets/inject.php');
-            $this->_runScript($js);
+            #$js = include(__DIR__.'/assets/inject.php');
+            #$this->_runScript($js);
         };
 
-        foreach(static::$defaultListener as $event => $aListener) {
-            $event = 'on'.ucfirst($event);
-            if (!isset($this->$event)) throw new Exception("event $event not defined");
-            foreach ($aListener as $listener) {
-                $this->$event[] = $listener;
-            };
-        }
+        $this->addEventListener(static::$defaultListener);
 
         if (static::$oInst) {
             static::$oInst->keepBrowser = true;
@@ -97,6 +92,22 @@ class Accept {
             $this->__smartCall($name, $args);
         }
         return $result ?: $this;
+    }
+
+    function addListener($event, $listener) {
+        $event = 'on'.ucfirst($event);
+        if (!isset($this->$event)) throw new Exception("event $event not defined");
+        $this->$event[] = $listener;
+    }
+
+    function addEventListener($aEventListener) {
+        foreach($aEventListener as $event => $aListener) {
+            $event = 'on'.ucfirst($event);
+            if (!isset($this->$event)) throw new Exception("event $event not defined");
+            foreach ($aListener as $listener) {
+                $this->$event[] = $listener;
+            };
+        }
     }
 
     function getDriver() {
@@ -151,7 +162,41 @@ class Accept {
         $this->oWd->executeScript($script);
     }
 
-    function _record() {
+    function _record($writeBack = true) {
+        $oWriter = new CodeWriter();
+        $oWriter->findTarget(self::class);
+
+        $oGen = new CodeGenerator([
+            'tab' => $oWriter->tab,
+            'lf' => $oWriter->lf,
+            'prefix' => $oWriter->getPrefix('record(', $indent),
+            'indent' => $indent,
+            'commentOut' => !$writeBack,
+        ]);
+
+        $oRecorder = new Recorder($this->oWd);
+        $oRecorder->init();
+        $oRecorder->onData[] = function($data) use ($oWriter, $oGen) {
+
+            $oGen->runAll($data);
+            $aCode = $oGen->getCodeArray();
+
+            $oWriter->addCode($aCode);
+            $oWriter->save();
+        };
+
+        $oRecorder->start();
+        $oRecorder->onSimulate[] = function () {
+            static $n = 0;
+            $func = isset($this->onSimulate[$n]) ? $this->onSimulate[$n] : null;
+            if ($func) $func($this);
+            $n = $n >= count($this->onSimulate) ? 0 : $n+1;
+        };
+        $oRecorder->waitForStop();
+
+
+
+        /*
         $this->_runScript('window.Recorder.start();');
 
         $this->onRecord($this);
@@ -159,26 +204,40 @@ class Accept {
         $state = WebDriverBy::id('recordResult');
         $cond = WebDriverExpectedCondition::presenceOfElementLocated($state);
         $wait = new WebDriverWait($this->oWd, 60, 500);
-        $wait->until($cond);
 
-        $oWriter = new CodeWriter();
-        $oWriter->findTarget(self::class);
+        do {
+            $wait->until($cond);
 
-        $json = $this->findElement('recordResult')->getText();
-        $data = Json::decode($json, Json::FORCE_ARRAY);
+            $oWriter = new CodeWriter();
+            $oWriter->findTarget(self::class);
 
-        #$code = $this->generateCode($rc, $prefix);
-        $oGen = new CodeGenerator([
-            'tab' => $oWriter->tab,
-            'lf' => $oWriter->lf,
-            'prefix' => $oWriter->getPrefix('record(', $indent),
-            'indent' => $indent,
-        ]);
-        $oGen->runAll($data);
-        $aCode = $oGen->getCodeArray();
+            $json = $this->findElement('recordResult')->getText();
+            $data = Json::decode($json, Json::FORCE_ARRAY);
 
-        $oWriter->addCode($aCode);
-        $oWriter->save();
+            #$code = $this->generateCode($rc, $prefix);
+            $oGen = new CodeGenerator([
+                'tab' => $oWriter->tab,
+                'lf' => $oWriter->lf,
+                'prefix' => $oWriter->getPrefix('record(', $indent),
+                'indent' => $indent,
+            ]);
+            $oGen->runAll($data);
+            $aCode = $oGen->getCodeArray();
+
+            $oWriter->addCode($aCode);
+            $oWriter->save();
+
+            $state = $this->findElement('recordState')->getAttribute('class');
+            $end = empty($state);
+            if ($state == 'reload') {
+                $this->_runScript('return document.readyState');
+                $js = include(__DIR__.'/assets/inject.php');
+                $this->_runScript($js);
+                $this->_runScript('window.Recorder.start();');
+            }
+        }
+        while (!$end);
+        */
     }
 
 }

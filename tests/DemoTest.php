@@ -10,7 +10,7 @@ $php = str_replace('demo/deepthought.html', __DIR__.'/../demo/deepthought.html',
 file_put_contents($file, $php);
 
 
-I::addDefaultListener('record', function($I) {
+I::addDefaultListener('simulate', function($I) {
     $I->click('#recordBar .keys');
     $I->click('#question');
     $I->type('the question');

@@ -34,12 +34,12 @@ Is::match('~I::open.*I::record.*'.
 file_put_contents(TEMP.'/record.php', $php);
 
 
-I::addDefaultListener('record', function($I) {
-    $I->waitUntil(function($I) { $I->see('#recordState')->hasClass('record'); });
-    $I->click('#recordBar .mouse');
+I::addDefaultListener('simulate', function($I) {
+    $I->wait('#recordState')->hasClass('record');
+    $I->click('#recordBar BUTTON.mouse');
     $I->click('#binda');
     $I->click('#recordState');
-    $I->waitUntil(function($I) { $I->see('#recordState')->hasNotClass('record'); });
+    $I->wait('#recordState')->hasNotClass('record');
 });
 include(TEMP.'/record.php');
 

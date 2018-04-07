@@ -6,4 +6,4 @@ Tracy\Debugger::$maxDepth = 8;
 Tracy\Debugger::$maxLength = 500;
 
 #include 'app/test.php';
-include 'FindMultiTest.php';
+include 'NavTest.php';

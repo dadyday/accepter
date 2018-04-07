@@ -1,4 +1,5 @@
 <?php
-require_once 'bootstrap.php';
+require_once __DIR__.'/../vendor/autoload.php';
 
-Tester\Helpers::purge(TEMP);
+Tester\Helpers::purge(__DIR__.'/_temp/');
+Tester\Helpers::purge(__DIR__.'/output/');

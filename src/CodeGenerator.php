@@ -20,6 +20,7 @@ class CodeGenerator {
             'indent' => 0,
             'tab' => '    ',
             'lf' => "\n",
+            'commentOut' => false,
         ]);
         if (is_numeric($this->oCfg->indent)) {
             $this->oCfg->indent = str_repeat($this->oCfg->tab, $this->oCfg->indent);
@@ -34,7 +35,7 @@ class CodeGenerator {
 
     function run($data) {
         $data = DataObject::from($data, true);
-        
+
         $selector = $this->getSelector($data->target);
 
         switch ($data->mode) {
@@ -99,11 +100,19 @@ class CodeGenerator {
 
     function getCodeArray() {
         $aRet = [];
+        if (!$this->aCode) return $aRet;
+
         $this->closeCommand();
-        foreach($this->aCode as $l => $line) {
-            $aRet[$l] = $this->oCfg->indent.$line.$this->oCfg->lf;
+        if ($this->oCfg->commentOut) {
+            $aRet[] = $this->oCfg->indent.'/* recorded'.$this->oCfg->lf;
         }
-        bdump($aRet);
+        foreach($this->aCode as $l => $line) {
+            $aRet[] = $this->oCfg->indent.$line.$this->oCfg->lf;
+        }
+        if ($this->oCfg->commentOut) {
+            $aRet[] = $this->oCfg->indent.'//*/'.$this->oCfg->lf;
+        }
+        #bdump($aRet);
         return $aRet;
     }
 
