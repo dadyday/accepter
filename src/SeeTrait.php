@@ -29,12 +29,15 @@ trait SeeTrait {
             $aRet['id'] = $aRet['name'] = $aRet['tagName'] = $aRet['className'] =
                 $aRet['linkText'] = $aRet['partialLinkText'] =
                 $string;
+            $aRet['xpath'] = "//*[@value='$string']";
         }
         elseif (preg_match('~^([#\.<>+:\[\] \w-])+$~', $string, $aMatch)) {
             $aRet['cssSelector'] = $aRet['linkText'] = $aRet['partialLinkText'] = $string;
+            $aRet['xpath'] = "//*[@value='$string']";
         }
         else {
             $aRet['linkText'] = $aRet['partialLinkText'] = $string;
+            $aRet['xpath'] = "//*[@value='$string']";
         }
         return $aRet;
     }

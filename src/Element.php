@@ -3,6 +3,8 @@ namespace Accepter;
 
 use Facebook\WebDriver\WebDriver as IWebDriver;
 use Facebook\WebDriver\WebDriverElement as IWebElement;
+use Facebook\WebDriver\WebDriverBy;
+
 use Exception;
 
 class Element {
@@ -15,6 +17,10 @@ class Element {
     function __construct(Accept $oAccept, IWebElement $oEl) {
         $this->oAccept = $oAccept;
         $this->oElement = $oEl;
+    }
+
+    function getSelectedOption() {
+        return $this->oElement->findElement(WebDriverBy::xpath('option[@selected]'));
     }
 
     function fail($message, $actual, $expected) {
@@ -46,6 +52,13 @@ class Element {
 
     protected function _click() {
          $this->oElement->click();
+         return [true];
+    }
+
+    protected function _enter($text) {
+         $this->oElement->click();
+         $this->oAccept->type($text);
+         $this->oAccept->hit('ENTER');
          return [true];
     }
 
@@ -86,6 +99,9 @@ class Element {
 
     protected function _hasValue($value) {
         $text = $this->oElement->getAttribute('value');
+        if ($this->oElement->getTagName() == 'select') {
+            $text .= ' '. $this->getSelectedOption()->getText();
+        }
         // TODO: get value from check, select etc too
         if (empty($value)) {
             return [!trim($text), "%1 has *not* empty value", $text, $value];
@@ -94,6 +110,19 @@ class Element {
             return [preg_match($value, $text), "value %1 matches *not* pattern %2", $text, $value];
         }
         return [strpos($text, $value) !== false, "value %1 contains *not* %2", $text, $value];
+    }
+
+    protected function _isSelected() {
+        $is = $this->oElement->getAttribute('selected');
+        return [!empty($is), "option is *not* selected"];
+    }
+
+    protected function _hasName($should) {
+        $is = $this->oElement->getAttribute('name');
+        if (empty($should)) {
+            return [!trim($is), "%1 has *no* name", $is, $should];
+        }
+        return [strpos($is, $should) === 0, "%1 is *not* of name %2", $is, $should];
     }
 
     protected function _hasText($value) {
@@ -105,6 +134,15 @@ class Element {
             return [preg_match($value, $text), "%1 matches *not* pattern %2", $text, $value];
         }
         return [strpos($text, $value) !== false, "%1 contains *not* text %2", $text, $value];
+    }
+
+    protected function _hasTagName($name) {
+        $tag = $this->oElement->getTagName();
+        return [$tag == $name, "element %1 is *not* of tag %2", $tag, $name];
+    }
+
+    protected function _isTag($name) {
+        return $this->_hasTagName($name);
     }
 
 }

@@ -1,0 +1,71 @@
+Accepter\Element::__set_state(/* #729f */ [
+	'oAccept' => Accepter\Accept::__set_state(/* #339a */ [
+		'oWd' => Accepter\Driver::__set_state(/* #9687 */ [
+			'oRemote' => Facebook\WebDriver\Remote\RemoteWebDriver::__set_state(/* #b427 */ [
+				'executor' => Facebook\WebDriver\Remote\HttpCommandExecutor::__set_state(/* #4613 */ [
+					'url' => 'http://localhost:4444/wd/hub',
+					'curl' => /* resource curl */,
+				]),
+				'capabilities' => Facebook\WebDriver\Remote\DesiredCapabilities::__set_state(/* #f7d8 */ [
+					'capabilities' => [
+						'applicationCacheEnabled' => false,
+						'rotatable' => false,
+						'mobileEmulationEnabled' => false,
+						'networkConnectionEnabled' => false,
+						'chrome' => [
+							'chromedriverVersion' => '2.36.540470 (e522d04694c7ebea4ba8821272dbef4f9b818c91)',
+							'userDataDir' => 'C:\\Users\\User\\AppData\\Local\\Temp\\scoped_dir7224_26115',
+						],
+						'takesHeapSnapshot' => true,
+						'pageLoadStrategy' => 'normal',
+						'databaseEnabled' => false,
+						'handlesAlerts' => true,
+						'hasTouchScreen' => false,
+						'version' => '65.0.3325.181',
+						'platform' => 'Windows NT',
+						'browserConnectionEnabled' => false,
+						'nativeEvents' => true,
+						'acceptSslCerts' => false,
+						'acceptInsecureCerts' => false,
+						'locationContextEnabled' => true,
+						'webStorageEnabled' => true,
+						'browserName' => 'chrome',
+						'takesScreenshot' => true,
+						'javascriptEnabled' => true,
+						'cssSelectorsEnabled' => true,
+						'setWindowRect' => true,
+						'unexpectedAlertBehaviour' => '',
+						'webdriver.remote.sessionid' => 'a5241e759ee469b81960eb675bab3274',
+					],
+				]),
+				'sessionID' => 'a5241e759ee469b81960eb675bab3274',
+				'mouse' => null,
+				'keyboard' => null,
+				'touch' => null,
+				'executeMethod' => Facebook\WebDriver\Remote\RemoteExecuteMethod::__set_state(/* #2f5e */ [
+					'driver' => /* Facebook\WebDriver\Remote\RemoteWebDriver dumped on line 4 */,
+				]),
+			]),
+			'oListener' => /* Accepter\Accept dumped on line 2 */,
+			'driver' => /* Facebook\WebDriver\Remote\RemoteWebDriver dumped on line 4 */,
+			'dispatcher' => Facebook\WebDriver\WebDriverDispatcher::__set_state(/* #5227 */ [
+				'listeners' => [/* Accepter\Driver dumped on line 3 */],
+				'driver' => /* Accepter\Driver dumped on line 3 */,
+			]),
+		]),
+		'keepBrowser' => false,
+		'onEventDefault' => [],
+		'onSimulate' => [],
+		'onAfterNavigateTo' => [
+			/* Closure defined in file C:\var\www\test\nette\accepter\src\Accept.php on line 66 */,
+		],
+	]),
+	'oElement' => Facebook\WebDriver\Support\Events\EventFiringWebElement::__set_state(/* #de23 */ [
+		'element' => Facebook\WebDriver\Remote\RemoteWebElement::__set_state(/* #d144 */ [
+			'executor' => /* Facebook\WebDriver\Remote\RemoteExecuteMethod dumped on line 45 */,
+			'id' => '0.464968170490784-1',
+			'fileDetector' => Facebook\WebDriver\Remote\UselessFileDetector::__set_state(/* #c157 */ []),
+		]),
+		'dispatcher' => /* Facebook\WebDriver\WebDriverDispatcher dumped on line 51 */,
+	]),
+])
