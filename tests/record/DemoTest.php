@@ -5,8 +5,8 @@ use Tester\Assert as Is;
 use Accepter\Accept as I;
 
 $file = TEMP.'/demo.php';
-$php = loadCodeblock(__DIR__.'/../readme.md', 'php', 0);
-$php = str_replace('demo/deepthought.html', __DIR__.'/../demo/deepthought.html', $php);
+$php = loadCodeblock(ROOT.'/readme.md', 'php', 0);
+$php = str_replace('demo/deepthought.html', ROOT.'/demo/deepthought.html', $php);
 file_put_contents($file, $php);
 
 
@@ -25,7 +25,7 @@ I::addDefaultListener('simulate', function($I) {
 include($file);
 
 
-$should = loadCodeblock(__DIR__.'/../readme.md', 'php', 1);
+$should = loadCodeblock(ROOT.'/readme.md', 'php', 1);
 $changed = file_get_contents($file);
 dump($changed);
 

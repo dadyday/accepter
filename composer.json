@@ -5,7 +5,7 @@
     "prefer-stable": true,
     "scripts": {
         "demo": "\"./vendor/bin/tester\" -C demo",
-        "test": "\"./vendor/bin/tester\" -C -j 4 --stop-on-fail --setup tests/setup.php ",
+        "test": "tests\\test.cmd",
         "cover": "\"./vendor/bin/tester\" -C -j 4 --stop-on-fail --setup tests/setup.php --coverage tests/_coverage.html --coverage-src src tests"
     },
     "autoload": {

@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__.'/../vendor/autoload.php';
 
+define('ROOT', __DIR__.'/../');
 Tester\Environment::setup();
 if (!getenv(Tester\Environment::RUNNER)) {
     Tracy\Debugger::enable();
