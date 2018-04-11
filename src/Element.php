@@ -4,6 +4,7 @@ namespace Accepter;
 use Facebook\WebDriver\WebDriver as IWebDriver;
 use Facebook\WebDriver\WebDriverElement as IWebElement;
 use Facebook\WebDriver\WebDriverBy;
+use Facebook\WebDriver\Exception\NoSuchElementException;
 
 use Exception;
 
@@ -19,8 +20,29 @@ class Element {
         $this->oElement = $oEl;
     }
 
+    function find($value, $type = null) {
+        try {
+            return $this->oElement->findElement(WebDriverBy::$type($value));
+        }
+        catch (NoSuchElementException $e) {}
+        try {
+            return $this->oAccept->getDriver()->findElement(WebDriverBy::$type($value));
+        }
+        catch (NoSuchElementException $e) {}
+    }
+
     function getSelectedOption() {
-        return $this->oElement->findElement(WebDriverBy::xpath('option[@selected]'));
+        return $this->find('option[@selected]', 'xpath');
+    }
+
+    function getLabelField() {
+        $tag = $this->oElement->getTagName();
+        if ($tag !== 'label') {
+            return null;
+        };
+        $for = $this->oElement->getAttribute('for');
+        if ($for) return $this->find($for, 'id');
+        return $this->find('input, textarea, select', 'cssSelector');
     }
 
     function fail($message, $actual, $expected) {
@@ -143,6 +165,15 @@ class Element {
 
     protected function _isTag($name) {
         return $this->_hasTagName($name);
+    }
+
+    protected function _labelFor() {
+        $tag = $this->oElement->getTagName();
+        if ($tag !== 'label') {
+            return [false, "element %1 is *not* a label", $tag];
+        }
+        $this->oElement = $this->getLabelField();
+        return [!empty($this->oElement), "element %1 has *not* a field", $tag];
     }
 
 }

@@ -21,23 +21,25 @@ trait SeeTrait {
         Link text - WebDriverBy::linkText('Sign in here')
         Partial link text - WebDriverBy::partialLinkText('Sign in')
         */
+        $lString = strtolower($string);
+
         if (preg_match('~^<([\w-]+)>$~', $string, $aMatch)) $aRet['tagName'] = $aMatch[1];
         elseif (preg_match('~^#([\w-]+)$~', $string, $aMatch)) $aRet['id'] = $aMatch[1];
         elseif (preg_match('~^\.([\w-]+)$~', $string, $aMatch)) $aRet['className'] = $aMatch[1];
         elseif (preg_match('~^/.+~', $string, $aMatch)) $aRet['xpath'] = $string;
-        elseif (preg_match('~^[\w-]+$~', $string, $aMatch)) {
-            $aRet['id'] = $aRet['name'] = $aRet['tagName'] = $aRet['className'] =
-                $aRet['linkText'] = $aRet['partialLinkText'] =
-                $string;
-            $aRet['xpath'] = "//*[@value='$string']";
-        }
-        elseif (preg_match('~^([#\.<>+:\[\] \w-])+$~', $string, $aMatch)) {
-            $aRet['cssSelector'] = $aRet['linkText'] = $aRet['partialLinkText'] = $string;
-            $aRet['xpath'] = "//*[@value='$string']";
-        }
         else {
-            $aRet['linkText'] = $aRet['partialLinkText'] = $string;
-            $aRet['xpath'] = "//*[@value='$string']";
+            if (preg_match('~^[\w-]+$~', $string, $aMatch)) {
+                $aRet['id'] = $aRet['name'] = $aRet['className'] = $string;
+                $aRet['tagName'] = $lString;
+            }
+            elseif (preg_match('~^([#\.<>+:\[\] \w-])+$~', $string, $aMatch)) {
+                $aRet['cssSelector'] = $string;
+            }
+            # obsolete: $aRet['linkText'] = $aRet['partialLinkText'] = $lString;
+            # xpath2 wont work: $aRet['xpath'] = "//*[contains(lower-case(@value), '$lString') or contains(lower-case(text()), '$lString')]";
+            $aRet['xpath'] = "//*[contains(translate(@value, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '$lString') or contains(translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '$lString')]";
+            # caseinsens: $aRet['xpath'] = "//*[contains(@value, '$string') or contains(text(), '$string')]";
+            # notcontain: $aRet['xpath'] = "//*[@value='$string' or text()='$string']";
         }
         return $aRet;
     }
@@ -60,8 +62,11 @@ trait SeeTrait {
                 if ($el) return $el;
             }
             catch (Exception\NoSuchElementException $e) {}
-            catch (Exception\InvalidSelectorException $e) {}
+            catch (Exception\InvalidSelectorException $e) {
+                #dump([$mechanism, $search]);
+            }
         }
+        #dump($aMech);
         return null;
     }
 

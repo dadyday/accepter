@@ -1,5 +1,5 @@
 <?php
-require 'bootstrap.php';
+require_once __DIR__.'/../bootstrap.php';
 
 use Tester\Assert as Is;
 use Accepter\Accept as I;
@@ -71,6 +71,30 @@ class FieldTest extends Tester\TestCase {
             ->hasValue('aValue')
             ->hasText('First')
             ->isNotSelected()
+        ;
+
+    }
+
+    function testLabel() {
+        $this->prepare('
+            <label for="theId">aLabel</label>
+            <input id="theId" name="theName">
+            <label>
+                anotherLabel
+                <input name="anotherName">
+            </label>
+        ');
+
+        I::see('aLabel')
+            ->labelFor()
+            ->isTag('input')
+            ->hasName('theName')
+        ;
+
+        I::see('anotherLabel')
+            ->labelFor()
+            ->isTag('input')
+            ->hasName('anotherName')
         ;
 
     }
