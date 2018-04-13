@@ -95,25 +95,46 @@ var Recorder = class {
         }
     }
 
-    addEvent(ev, el) {
+    recordEvent(ev) {
         if (!this.mode) return;
-        if (el != this.lastElement) this.sendData();
-        this.lastElement = el;
+        if (ev.target != this.lastElement) this.sendData();
+        this.lastElement = ev.target;
 
+        var args = {};
+        switch (ev.type) {
+            case 'keydown':
+            case 'keypress':
+            case 'keyup':
+                args.key = ev.key;
+                args.code = ev.code;
+                args.alt = ev.altKey;
+                args.ctrl = ev.ctrlKey;
+                args.shift = ev.shiftKey;
+                args.meta = ev.metaKey;
+                args.hold = ev.repeat;
+                break;
+        }
+
+        this.addEvent(this.mode, ev.type, args, ev.target);
+        return true;
+    }
+
+    addEvent(mode, type, args, target) {
         var item = {
-            mode: this.mode,
-            type: ev,
+            mode: mode,
+            type: type,
+            args: args,
             target: {
-                tag: el.tagName,
-                id: el.id,
-                name: $(el).attr('name'),
-                text: el.textContent,
-                classList: $(el).attr('class')
+                tag: target.tagName,
+                id: target.id,
+                name: $(target).attr('name'),
+                value: $(target).val(),
+                text: target.textContent,
+                classes: $(target).attr('class'),
+                attributes: target.attributes
             }
         };
         this.data.push(item);
-
-        return true;
     }
 
     listener(ev) {
@@ -124,7 +145,7 @@ var Recorder = class {
         if (ev.type == 'unload') return this.reload();
         if (ev.type == 'mouseover') return this.highlite(ev.target, true);
         if (ev.type == 'mouseout') return this.highlite(ev.target, false);
-        return this.addEvent(ev.type, ev.target);
+        return this.recordEvent(ev);
     }
 
 };

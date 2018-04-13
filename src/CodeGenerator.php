@@ -59,7 +59,12 @@ class CodeGenerator {
             case 'mouse':
             case 'keys':
                 $this->openCommand("see('$selector')", $selector);
-                $this->addAction($data->type, $data->args);
+                if ($data->type == 'keydown') {
+                    $this->addKeyAction($data->args);
+                }
+                else {
+                    $this->addAction($data->type);
+                }
                 break;
             default:
                 throw new Exception("unknown data mode $data->mode");
@@ -99,8 +104,42 @@ class CodeGenerator {
         #$this->aCode[] = $this->indent(1)."->hasColor('{$target->color}')";
     }
 
-    function addAction($type, $args) {
+    var $lastKey = '';
+
+    function addKeyAction($oArgs) {
+        $key = $oArgs->key;
+
+        if (preg_match('~^[\x20-\xff]$~', $key)) {
+            if ($this->lastKey) {
+                $this->removeLastAction();
+            }
+            $this->lastKey .= $key;
+            return $this->addAction('type', "'$this->lastKey'");
+        }
+
+        if ($key == 'Enter') {
+            if ($this->lastKey) {
+                $this->removeLastAction();
+            }
+            $ok = $this->addAction('enter', "'$this->lastKey'");
+            $this->lastKey = '';
+            return $ok;
+        }
+
+        if (in_array($key, ['Shift', 'Control', 'Alt', 'AltGraph'])) {
+            return;
+        }
+
+        $this->lastKey = '';
+        return $this->addAction('hit', "'$key'");
+    }
+
+    function addAction($type, $args = '') {
         $this->aCode[] = $this->oCfg->tab.'->'.$type.'('.$args.')';
+    }
+
+    function removeLastAction() {
+        $this->aCode = array_slice($this->aCode, 0, -1);
     }
 
     function getCodeArray() {
