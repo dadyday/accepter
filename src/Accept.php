@@ -183,6 +183,8 @@ class Accept {
 
             $oWriter->addCode($aCode);
             $oWriter->save();
+
+            $oGen->reset();
         };
 
         $oRecorder->start();

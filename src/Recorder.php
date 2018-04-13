@@ -36,19 +36,21 @@ class Recorder {
     function wait($callback, $time = 10, $interval = 500) {
         $timeout = microtime(true) + $time;
         while ($timeout > microtime(true)) {
-            if ($callback()) return;
+            if ($callback()) return true;
             usleep($interval * 1000);
         }
-        throw new Exception('timeout');
+        return false;
+        #throw new Exception('timeout');
     }
 
     function init() {
         if ($this->isRunning()) return;
         $js = include(__DIR__.'/assets/inject.php');
         $this->run($js);
-        $this->wait(function() {
+        $ok = $this->wait(function() {
             return $this->isRunning();
         });
+        if (!$ok) throw new Exception('recorder will not run');
     }
 
     function isRunning() {
@@ -65,9 +67,10 @@ class Recorder {
 
     function start() {
         $this->run('window.Recorder.start();');
-        $this->wait(function() {
+        $ok = $this->wait(function() {
             return $this->isRunning() && $this->isRecording();
         });
+        if (!$ok) throw new Exception('recorder will not start');
     }
 
     function restart() {
@@ -75,13 +78,14 @@ class Recorder {
     }
 
     function waitLoaded() {
-        $this->wait(function() {
+        $ok = $this->wait(function() {
             return $this->run('return document.readyState;') == 'complete';
         });
+        if (!$ok) throw new Exception('document will not be ready');
     }
 
     function handleData() {
-        $data = $this->run('return window.Recorder ? window.Recorder.data : [];');
+        $data = $this->run('return window.Recorder ? window.Recorder.transmitData() : [];');
         $this->onData($data);
     }
 
@@ -90,7 +94,7 @@ class Recorder {
         do {
             if ($this->onSimulate) $this->onSimulate($this);
 
-            $this->wait(function() {
+            $ok = $this->wait(function() {
                 return !$this->isRunning() || !$this->isRecording();
             }, 60);
 

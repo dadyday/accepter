@@ -1,5 +1,5 @@
 <?php
-require_once 'bootstrap.php';
+require_once __DIR__.'/../bootstrap.php';
 
 use Tester\Assert as Is;
 use Accepter\Accept as I;
@@ -18,9 +18,10 @@ I::addDefaultListener('simulate', function($I) {
     $I->click('#recordBar .wait');
     $I->wait('//li[text()=42]', 10)
         ->click();
-
+});
+I::addDefaultListener('simulate', function($I) {
     $I->click('#recordState');
-    $I->wait('#recordState')->hasNotClass('record');
+    $I->wait('#recordState', 20)->hasNotClass('record');
 });
 include($file);
 

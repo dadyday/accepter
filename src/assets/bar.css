@@ -67,3 +67,5 @@
 #recordBar .keys::before { content: "\e837"; }
 #recordBar .see::before { content: "\e81b"; }
 #recordBar .wait::before { content: "\e85f"; }
+
+#recordBar .switched { background: #ccc; }

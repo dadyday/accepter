@@ -27,6 +27,11 @@ class CodeGenerator {
         }
     }
 
+    function reset() {
+        $this->aCode = [];
+        $this->lastSelector = null;
+    }
+
     function runAll($aData) {
         foreach ($aData as $data) {
             $this->run($data);
