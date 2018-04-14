@@ -73,14 +73,30 @@ class Element {
     }
 
     protected function _click() {
-         $this->oElement->click();
-         return [true];
+        $this->oElement->click();
+        return [true];
+    }
+
+    protected function _focus() {
+        $id = $this->oElement->getAttribute("id");
+        $this->oAccept->runScript("document.getElementById('$id').focus();");
+        #$this->oElement->click();
+        return [true];
     }
 
     protected function _enter($text) {
-         $this->oElement->click();
-         $this->oAccept->type($text);
+         $this->_type($text);
          $this->oAccept->hit('ENTER');
+         return [true];
+    }
+
+    protected function _type($text) {
+         $this->oAccept->type($text);
+         return [true];
+    }
+
+    protected function _hit($key) {
+         $this->oAccept->hit($key);
          return [true];
     }
 

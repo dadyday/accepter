@@ -57,13 +57,16 @@ class CodeGenerator {
                 $this->addInspection($data->target);
                 break;
             case 'mouse':
-            case 'keys':
                 $this->openCommand("see('$selector')", $selector);
+                $this->addAction($data->type);
+                break;
+            case 'keys':
+                $this->openCommand("focus('$selector')", $selector);
                 if ($data->type == 'keydown') {
                     $this->addKeyAction($data->args);
                 }
                 else {
-                    $this->addAction($data->type);
+                    #$this->addAction($data->type);
                 }
                 break;
             default:

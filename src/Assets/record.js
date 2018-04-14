@@ -23,11 +23,13 @@ var Recorder = class {
     }
 
     sendData() {
+        this.transmit = [];
         if (!this.data.length) return;
         this.transmit = this.data;
         this.data = [];
         this.lastElement = null;
         this.signal('data');
+        //console.log('sendData', this);
     }
 
     transmitData() {

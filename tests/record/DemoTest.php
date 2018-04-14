@@ -32,8 +32,8 @@ dump($changed);
 
 Is::match('~'.
     'I::open.*'.
-    'I::see.*'.
-        'click.*'.
+    'I::focus.*'.
+        'enter.*'.
     'I::wait.*'.
         'hasText.*'.
     'I::record.*'.

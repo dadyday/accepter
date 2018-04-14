@@ -9,6 +9,7 @@ Tracy\Debugger::$maxLength = 500;
 #include 'NavTest.php';
 
 use Accepter\Accept as I;
+#I::getInstance()->keepBrowser = true;
 
 I::open(__DIR__.'/../demo/deepthought.html');
 

@@ -22,7 +22,7 @@ See the example in the demo folder.
 
 Now if you run the accepter, it will open a browser window with a small toolbar.
 
-* TODO: screenshot here or vid
+![Sample recording](docs\images\rec.gif)
 
 You can use the toolbar to select the elements on the page and choose what you want to inspect. If you are ready, the accepter will add these actions to your script. e.g:
 
@@ -33,7 +33,7 @@ use Accepter\Accept as I;
 I::open('demo/deepthought.html');
 
 //* recorded 2018-04-01 11:00:00
-I::see('#question')
+I::focus('#question')
     ->enter('the question');
 
 I::wait('#answers li', 10)
@@ -46,8 +46,6 @@ I::record();
 ```
 
 Run the script again, and all your actions and assert will be automated done. If somewhat fails, the browser stops and let you inspect what was wrong.
-
-* TODO: screenshot here or vid
 
 Nice, huh?
 

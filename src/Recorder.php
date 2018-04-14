@@ -86,6 +86,7 @@ class Recorder {
 
     function handleData() {
         $data = $this->run('return window.Recorder ? window.Recorder.transmitData() : [];');
+        #bdump($data, 'handleData');
         $this->onData($data);
     }
 

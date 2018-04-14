@@ -84,6 +84,13 @@ trait SeeTrait {
         return $el;
     }
 
+    function _focus($desc) {
+        $el = $this->_find($desc);
+        $el->isVisible();
+        $el->focus();
+        return $el;
+    }
+
     function _wait($desc, $timeout = 10) {
         $aEl = [];
         $oWait = new Wait($this);
