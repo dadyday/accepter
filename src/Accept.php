@@ -97,7 +97,7 @@ class Accept {
     function addListener($event, $listener) {
         $event = 'on'.ucfirst($event);
         if (!isset($this->$event)) throw new Exception("event $event not defined");
-        $this->$event[] = $listener;
+        array_push($this->$event, $listener);
     }
 
     function addEventListener($aEventListener) {
@@ -105,7 +105,7 @@ class Accept {
             $event = 'on'.ucfirst($event);
             if (!isset($this->$event)) throw new Exception("event $event not defined");
             foreach ($aListener as $listener) {
-                $this->$event[] = $listener;
+                array_push($this->$event, $listener);
             };
         }
     }
