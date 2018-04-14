@@ -22,7 +22,7 @@ See the example in the demo folder.
 
 Now if you run the accepter, it will open a browser window with a small toolbar.
 
-![Sample recording](docs\images\rec.gif)
+![Sample recording](docs/images/rec.gif)
 
 You can use the toolbar to select the elements on the page and choose what you want to inspect. If you are ready, the accepter will add these actions to your script. e.g:
 
