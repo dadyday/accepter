@@ -11,7 +11,7 @@
     function answer(question) {
         var knowit = question.match(/the\s+question/);
         if (knowit) {
-            addItem('let me think ... come back in 7.5 Millionen µs ...');
+            addItem('let me think ... come back in 7.5 Million µs ...');
             setTimeout(function () { addItem(42, true);}, 7500);
         }
         else {

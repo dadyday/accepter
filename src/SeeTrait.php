@@ -67,7 +67,7 @@ trait SeeTrait {
             }
         }
         #dump($aMech);
-        return null;
+        return [];
     }
 
     function _find($desc) {
@@ -82,6 +82,12 @@ trait SeeTrait {
         $el = $this->_find($desc);
         $el->isVisible();
         return $el;
+    }
+
+    function _dontSee($desc) {
+        $aEl = $this->findElements($desc);
+        Assert::$counter++;
+        return new ElementList($this, $aEl, false);
     }
 
     function _focus($desc) {
