@@ -5,6 +5,7 @@ use Facebook\WebDriver\WebDriver as IWebDriver;
 use Facebook\WebDriver\WebDriverElement as IWebElement;
 use Facebook\WebDriver\WebDriverBy;
 use Facebook\WebDriver\Exception\NoSuchElementException;
+use Facebook\WebDriver\Exception\StaleElementReferenceException;
 
 use Exception;
 
@@ -50,7 +51,7 @@ class Element {
     }
 
     function __call($name, $args) {
-        if (!$this->_invoke("_$name", $args, $result)) {
+        if (!$this->_invokeCondition("_$name", $args, $result)) {
             if (!$this->_invokeNot($name, $args, $result)) {
                 throw new Exception("method $name not found");
             }
@@ -65,11 +66,21 @@ class Element {
     protected function _invokeNot($name, $args, &$result) {
         if (!preg_match('~^(is|has)No(?:t?)([A-Z]\w*)~', $name, $aMatch)) return false;
         $func = "_$aMatch[1]$aMatch[2]";
-        if (!$this->_invoke($func, $args, $result)) return false;
+        if (!$this->_invokeCondition($func, $args, $result)) return false;
 
         $result[0] = !$result[0];
         $result[1] = preg_replace('~(\*(.*)\*)~', '', $result[1]);
         return true;
+    }
+
+    protected function _invokeCondition($name, $args, &$result) {
+        try {
+            return $this->_invoke($name, $args, $result);
+        }
+        catch (StaleElementReferenceException $e) {
+            $result = [false, "element not embedded in document"];
+            return true;
+        }
     }
 
     protected function _click() {
@@ -85,23 +96,24 @@ class Element {
     }
 
     protected function _enter($text) {
-         $this->_type($text);
-         $this->oAccept->hit('ENTER');
-         return [true];
+        $this->_type($text);
+        $this->oAccept->hit('ENTER');
+        return [true];
     }
 
     protected function _type($text) {
-         $this->oAccept->type($text);
-         return [true];
+        $this->oAccept->type($text);
+        return [true];
     }
 
     protected function _hit($key) {
-         $this->oAccept->hit($key);
-         return [true];
+        $this->oAccept->hit($key);
+        return [true];
     }
 
     protected function _isVisible() {
-         return [$this->oElement->isDisplayed(), "is *not* visible"];
+        $ok = $this->oElement->isDisplayed();
+        return [$ok, "is *not* visible"];
     }
 
     protected function _isBold() {
