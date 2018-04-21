@@ -13,4 +13,6 @@ use Accepter\Accept as I;
 
 I::open(__DIR__.'/../demo/deepthought.html');
 
-I::record(false);
+$aCode = I::getRecord();
+$code = join("", $aCode);
+echo "<pre>$code</pre>";

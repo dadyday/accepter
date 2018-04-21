@@ -10,7 +10,7 @@ $ composer require --dev dadyday/accepter
 $ java -jar selenium-server-standalone.jar
 ```
 
-Create a test in your tests folder:
+Create a test in your tests/ folder:
 ```php
 <?php
 require_once __DIR__.'/../vendor/autoload.php';
@@ -28,6 +28,37 @@ Run the test:
 $ tester tests
 ```
 
+## Control Funcs
+
+There are some funcs, to control your browser itself.
+
+* `I::open(url)`
+    opens a website, and waits until it is loaded. Redirects will be processed too.
+    This should be called in the first lines of your test, because otherwise not very much of the following funcs will work.
+
+* `I::reload()`
+    reloads the current url, like as you click the browsers refresh button.
+
+* `I::goBack([steps])`
+    simulates a click on the browsers history-back button. The optional steps chooses a entry in your history list. e.g `I::goBack(2)` opens the penultimate url.
+
+* `I::goForward([steps])`
+    as opposite of goBack this func opens following pages, if they exist.
+
+## Page Helper
+
+* `I::waitPage([seconds])`
+    waits until the main document is fully loaded. That is useful after clicks, that navigate to other pages.
+
+* `I::waitAjax([seconds])`
+    waits for all background ajax requests, and returns when all of them are finished.
+
+* `I::waitLoaded({seconds})`
+    waits for both page loading and ajax requests. This func is recommented, so your tests become independed from your page architecture.
+
+* `I::waitScript({seconds})`
+    waits for long running javascript functions. This implies page loading and ajax requests too.
+
 ## Selectors
 
 ### Selector Funcs
@@ -36,17 +67,24 @@ Selector funcs are used to find one or more web elements on your page. They all 
 
 * `I::find(selector)`
     selects a list of elements, that matches the given selector string (see below)
+
 * `I::wait(selector, seconds)`
     same as `find`, but waits a given amount of seconds to become present. You can add here conditions and interaction too. The func will wait for every condition until it becomes true and the overall wait time is not elapsed. e.g
-    ```php
+```php
 I::wait('#flicker', 5)
     ->isVisible() // immediately
     ->click() // immediately
     ->isNotVisible() // waits until hidden
     ->isVisible(); // waits until shown
-    ```
+```
+
 * `I::see(selector)`
     selects a list of only visible elements
+
+There are also selectors, which checks the absence of a defined element.
+
+* `I::dontSee(selector)`
+    selects a list like above, but checks on the end (on destructing) that the list is empty.
 
 ### Selector Strings
 

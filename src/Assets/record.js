@@ -10,8 +10,8 @@ var Recorder = class {
         this.transmit = [];
         this.lastElement = null;
         var _this = this;
-        $('#recordState').on('click', function(ev) { _this.toggle(); });
-        $('#recordFuncs button').on('click', function(ev) { _this.interaction($(ev.target)); });
+        $('#recordState').on('click', ev => this.toggle());
+        $('#recordFuncs button').on('click', ev => this.interaction($(ev.target)));
     }
 
     signal(state) {
@@ -122,6 +122,7 @@ var Recorder = class {
     }
 
     addEvent(mode, type, args, target) {
+        var sel = window.getSelection();
         var item = {
             mode: mode,
             type: type,
@@ -133,7 +134,11 @@ var Recorder = class {
                 value: $(target).val(),
                 text: target.textContent,
                 classes: $(target).attr('class'),
-                attributes: target.attributes
+                attributes: target.attributes,
+                selection: {
+                    type: sel.type.toLowerCase(),
+                    text: sel.toString(),
+                }
             }
         };
         this.data.push(item);
@@ -143,10 +148,12 @@ var Recorder = class {
         if (this.state != 'recording') return;
         var bar = $(ev.target).closest('#recordBar');
         if (bar[0]) return;
+
         if (ev.target.tagName == 'BODY') return;
         if (ev.type == 'unload') return this.reload();
         if (ev.type == 'mouseover') return this.highlite(ev.target, true);
         if (ev.type == 'mouseout') return this.highlite(ev.target, false);
+
         return this.recordEvent(ev);
     }
 

@@ -5,4 +5,4 @@ use Accepter\Accept as I;
 
 I::open(__DIR__.'/deepthought.html');
 
-I::record();
+I::record(0);

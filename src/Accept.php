@@ -91,7 +91,7 @@ class Accept {
             //throw new Exception("method $name not found");
             $this->__smartCall($name, $args);
         }
-        return $result ?: $this;
+        return is_null($result) ? $this : $result;
     }
 
     function addListener($event, $listener) {
@@ -153,6 +153,11 @@ class Accept {
         $this->oWd->getKeyboard()->sendKeys($aConst[$key]);
     }
 
+    function _select($desc, $arg1 = null, $arg2 = null) {
+        $el = $this->see($desc);
+        $el->select($arg1, $arg2);
+    }
+
     function _waitUntil($callable, $timeout = 10) {
         $oWait = new Wait($this);
         return $oWait->run($callable, $timeout);
@@ -160,6 +165,25 @@ class Accept {
 
     function _runScript($script) {
         $this->oWd->executeScript($script);
+    }
+
+    function _getRecord() {
+        $oGen = new CodeGenerator([
+            'tab' => "\t",
+            'lf' => "\n",
+            'prefix' => 'I::',
+            'indent' => 0,
+            'commentOut' => false,
+        ]);
+
+        $aRet = [];
+        $writeFunc = function($aCode) use (&$aRet) {
+            $aRet += $aCode;
+        };
+        $this->_recordEx($oGen, $writeFunc);
+        bdump($aRet);
+
+        return $aRet;
     }
 
     function _record($writeBack = true) {
@@ -174,15 +198,22 @@ class Accept {
             'commentOut' => !$writeBack,
         ]);
 
+        $writeFunc = function($aCode) use ($oWriter) {
+            $oWriter->addCode($aCode);
+            $oWriter->save();
+        };
+
+        $this->_recordEx($oGen, $writeFunc);
+    }
+
+    function _recordEx($oGen, $writeFunc) {
         $oRecorder = new Recorder($this->oWd);
         $oRecorder->init();
-        $oRecorder->onData[] = function($data) use ($oWriter, $oGen) {
+        $oRecorder->onData[] = function($data) use ($oGen, $writeFunc) {
 
             $oGen->runAll($data);
             $aCode = $oGen->getCodeArray();
-
-            $oWriter->addCode($aCode);
-            $oWriter->save();
+            $writeFunc($aCode);
 
             $oGen->reset();
         };
@@ -195,51 +226,6 @@ class Accept {
             $n = $n >= count($this->onSimulate) ? 0 : $n+1;
         };
         $oRecorder->waitForStop();
-
-
-
-        /*
-        $this->_runScript('window.Recorder.start();');
-
-        $this->onRecord($this);
-
-        $state = WebDriverBy::id('recordResult');
-        $cond = WebDriverExpectedCondition::presenceOfElementLocated($state);
-        $wait = new WebDriverWait($this->oWd, 60, 500);
-
-        do {
-            $wait->until($cond);
-
-            $oWriter = new CodeWriter();
-            $oWriter->findTarget(self::class);
-
-            $json = $this->findElement('recordResult')->getText();
-            $data = Json::decode($json, Json::FORCE_ARRAY);
-
-            #$code = $this->generateCode($rc, $prefix);
-            $oGen = new CodeGenerator([
-                'tab' => $oWriter->tab,
-                'lf' => $oWriter->lf,
-                'prefix' => $oWriter->getPrefix('record(', $indent),
-                'indent' => $indent,
-            ]);
-            $oGen->runAll($data);
-            $aCode = $oGen->getCodeArray();
-
-            $oWriter->addCode($aCode);
-            $oWriter->save();
-
-            $state = $this->findElement('recordState')->getAttribute('class');
-            $end = empty($state);
-            if ($state == 'reload') {
-                $this->_runScript('return document.readyState');
-                $js = include(__DIR__.'/assets/inject.php');
-                $this->_runScript($js);
-                $this->_runScript('window.Recorder.start();');
-            }
-        }
-        while (!$end);
-        */
     }
 
 }

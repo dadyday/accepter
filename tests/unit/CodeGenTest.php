@@ -22,8 +22,7 @@ $oGen->run([
 $code = $oGen->getCode();
 $should = <<<PHP
     I::see('#myId')
-        ->hasText('hello world')
-        ->isNotBold();
+        ->hasText('hello world');
 
 PHP;
 #dump([ws($should), ws($code)]);

@@ -84,6 +84,52 @@ class Element {
         return [true];
     }
 
+    protected function _select($from = null, $to = null) {
+        $id = $this->oElement->getAttribute("id");
+        $text = $this->oElement->getText();
+        if (!is_numeric($from)) {
+            $search = empty($from) ? $text : $from;
+            $from = strpos($text, $search);
+            if ($from === false) return [ false, "%1 not found for select in %2", $search, $text];
+            $to = $from + strlen($search);
+        }
+        if (is_null($from)) {
+            $from = 0;
+        }
+        if (is_null($to)) {
+            $to = strlen($text);
+        }
+        if ($from < 0) {
+            $from = strlen($text) - $from;
+        }
+        if ($to < 0) {
+            $to = strlen($text) - $to;
+        }
+        $script = "
+            var selection = window.getSelection();
+            var range = document.createRange();
+            var el = document.getElementById('$id');
+            var tx = el.childNodes[0];
+            range.setStart(tx, $from);
+            range.setEnd(tx, $to);
+
+            var triggerMouseEvent = function (node, eventType) {
+                var clickEvent = document.createEvent ('MouseEvents');
+                clickEvent.initEvent (eventType, true, true);
+                node.dispatchEvent (clickEvent);
+            };
+
+            triggerMouseEvent (el, 'mouseover');
+            triggerMouseEvent (el, 'mousedown');
+            selection.empty();
+            selection.addRange(range);
+            triggerMouseEvent (el, 'mouseup');
+            triggerMouseEvent (el, 'click');
+        ";
+        $this->oAccept->runScript($script);
+        return [true];
+    }
+
     protected function _enter($text) {
          $this->_type($text);
          $this->oAccept->hit('ENTER');

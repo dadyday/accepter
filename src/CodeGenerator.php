@@ -77,7 +77,9 @@ class CodeGenerator {
     function getSelector($target) {
         if ($target->id) $selector = '#'.$target->id;
         else if ($target->class) $selector = '.'.$target->class;
-        else if ($target->text) $selector = $target->text;
+        else if ($text = $this->getSelectionText($target)) {
+            $selector = $text;
+        }
         else if ($target->xpath) $selector = $target->xpath;
 
         return $selector;
@@ -97,14 +99,25 @@ class CodeGenerator {
     }
 
     function addInspection($target) {
-        if ($target->text) {
-            $this->aCode[] = $this->oCfg->tab."->hasText('{$target->text}')";
+        if ($text = $this->getSelectionText($target)) {
+            $this->aCode[] = $this->oCfg->tab."->hasText('$text')";
+        }
+        if (isset($target->bold)) {
             $this->aCode[] = $this->oCfg->tab.($target->bold ? "->isBold()" : "->isNotBold()");
         };
         if ($target->class) {
             $this->aCode[] = $this->oCfg->tab."->hasClass('{$target->class}')";
         }
         #$this->aCode[] = $this->indent(1)."->hasColor('{$target->color}')";
+    }
+
+    function getSelectionText($target) {
+        if (!$target->text) return null;
+        if (empty($target->selection) || $target->selection->type !== 'range') return $target->text;
+
+        $text = $target->selection->text;
+        if (preg_match('~\b'.preg_quote($text).'\b~', $target->text)) return $text;
+        return '/'.preg_quote($text).'/';
     }
 
     var $lastKey = '';
